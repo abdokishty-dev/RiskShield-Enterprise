@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام إدارة المخاطر المؤسسي v3 — مكتمل 100%</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@400;500;700&display=swap');
+:root{
+  --bg:#07111f;--bg2:#0c1c35;--bg3:#112347;--bg4:#0a1628;
+  --gold:#f0c040;--blue:#3a9de1;--teal:#1fc6c0;--red:#e85d5d;
+  --green:#2ec97e;--orange:#f07d40;--purple:#9b7fe8;
+  --t1:#e8f0fe;--t2:#8aa8d4;--t3:#4a6a9a;
+  --border:#1e3a6e;--border2:#2a4a7e;
+  --rc:var(--red);--rh:var(--orange);--rm:var(--gold);--rl:var(--green);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;direction:rtl}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+header{background:linear-gradient(135deg,#07111f,#0f2a5a,#1a3a7a);border-bottom:2px solid var(--gold);padding:0 1.2rem;position:sticky;top:0;z-index:200;box-shadow:0 2px 20px rgba(0,0,40,.8)}
+.hdr{max-width:1800px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;gap:.6rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.7rem}
+.logo-ico{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),var(--orange));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.logo h1{font-size:.92rem;font-weight:900;color:var(--gold);line-height:1.2}
+.logo p{font-size:.64rem;color:var(--t2)}
+nav{display:flex;gap:.2rem;flex-wrap:wrap}
+.nb{background:transparent;border:1px solid var(--border);color:var(--t2);padding:.32rem .65rem;border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.72rem;font-weight:600;transition:all .2s;white-space:nowrap}
+.nb:hover,.nb.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.hdr-acts{display:flex;gap:.3rem;align-items:center;position:relative}
+.btn-g{background:linear-gradient(135deg,var(--green),#22a067);border:none;color:#fff;padding:.38rem .85rem;border-radius:6px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.72rem;font-weight:700;display:flex;align-items:center;gap:.3rem;transition:all .2s}
+.btn-g:hover{transform:translateY(-1px)}
+.layout{max-width:1800px;margin:0 auto;padding:1rem 1.2rem}
+.tab{display:none}.tab.active{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:.7rem;margin-bottom:1rem}
+.kpi{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:.85rem;position:relative;overflow:hidden;transition:transform .2s;cursor:default}
+.kpi:hover{transform:translateY(-2px)}
+.kpi::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%;background:var(--ac,var(--blue))}
+.kpi-lbl{font-size:.67rem;color:var(--t2);font-weight:600;margin-bottom:.3rem}
+.kpi-val{font-size:1.65rem;font-weight:900;color:var(--vc,var(--t1));line-height:1}
+.kpi-sub{font-size:.62rem;color:var(--t3);margin-top:.2rem}
+.st{font-size:.88rem;font-weight:700;color:var(--gold);margin-bottom:.75rem;display:flex;align-items:center;gap:.4rem;border-bottom:1px solid var(--border);padding-bottom:.42rem}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.85rem}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}
+.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.85rem}
+.g4{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.75rem}
+@media(max-width:768px){.g2{grid-template-columns:1fr}.hdr-nav{display:none}}
+.fg{display:flex;flex-direction:column;gap:.28rem}
+.fg label{font-size:.66rem;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.04em}
+.fg input,.fg select,.fg textarea{background:var(--bg4);border:1px solid var(--border);border-radius:6px;color:var(--t1);padding:.48rem .72rem;font-family:'Cairo',sans-serif;font-size:.81rem;transition:border-color .2s;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(58,157,225,.1)}
+.fg textarea{resize:vertical;min-height:62px}
+.fg select option{background:var(--bg2)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:.72rem}
+.full{grid-column:1/-1}
+.score-row{display:flex;align-items:center;gap:.6rem;margin-top:.32rem}
+.score-box{background:var(--bg4);border:2px solid var(--border);border-radius:8px;padding:.38rem .75rem;font-size:1.18rem;font-weight:900;min-width:52px;text-align:center;transition:all .3s}
+.btn-p{background:linear-gradient(135deg,var(--blue),#2278c4);border:none;color:#fff;padding:.58rem 1.5rem;border-radius:8px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.83rem;font-weight:700;display:flex;align-items:center;gap:.38rem;transition:all .2s;margin-top:.65rem}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(58,157,225,.38)}
+.btn-s{background:linear-gradient(135deg,var(--teal),#179e9a);border:none;color:#fff;padding:.48rem .95rem;border-radius:7px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.76rem;font-weight:700;display:flex;align-items:center;gap:.32rem;transition:all .2s}
+.btn-s:hover{transform:translateY(-1px)}
+.btn-w{background:linear-gradient(135deg,var(--orange),#c85a20);border:none;color:#fff;padding:.48rem .95rem;border-radius:7px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.76rem;font-weight:700;display:flex;align-items:center;gap:.32rem;transition:all .2s}
+.btn-w:hover{transform:translateY(-1px)}
+.tw{background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:.85rem}
+.ttb{padding:.75rem .95rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);gap:.6rem;flex-wrap:wrap}
+.si{background:var(--bg4);border:1px solid var(--border);border-radius:6px;color:var(--t1);padding:.38rem .75rem;font-family:'Cairo',sans-serif;font-size:.76rem;width:210px}
+.si:focus{outline:none;border-color:var(--blue)}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--bg2);color:var(--t2);font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.62rem .82rem;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:hover{background:rgba(58,157,225,.05)}
+tbody td{padding:.57rem .82rem;font-size:.77rem;vertical-align:middle}
+.chip{padding:.18rem .55rem;border-radius:20px;font-size:.65rem;font-weight:700;display:inline-block;white-space:nowrap}
+.c-crit{background:rgba(232,93,93,.18);color:var(--rc);border:1px solid rgba(232,93,93,.35)}
+.c-high{background:rgba(240,125,64,.18);color:var(--rh);border:1px solid rgba(240,125,64,.35)}
+.c-med{background:rgba(240,192,64,.18);color:var(--rm);border:1px solid rgba(240,192,64,.35)}
+.c-low{background:rgba(46,201,126,.18);color:var(--rl);border:1px solid rgba(46,201,126,.35)}
+.ab{background:transparent;border:1px solid var(--border);color:var(--t2);padding:.18rem .48rem;border-radius:5px;cursor:pointer;font-size:.66rem;transition:all .15s;margin-left:.18rem}
+.ab.del{border-color:rgba(232,93,93,.3);color:var(--rc)}
+.ab.edt{border-color:rgba(58,157,225,.3);color:var(--blue)}
+.ab:hover{background:var(--border);color:#fff}
+.ab.del:hover{background:var(--rc);border-color:var(--rc);color:#fff}
+.ab.edt:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+.fc-bar{display:flex;gap:.32rem;flex-wrap:wrap}
+.fc{background:transparent;border:1px solid var(--border);color:var(--t2);padding:.2rem .62rem;border-radius:20px;cursor:pointer;font-size:.7rem;font-weight:600;font-family:'Cairo',sans-serif;transition:all .15s}
+.fc.active,.fc:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+.empty{text-align:center;padding:2rem;color:var(--t3);font-size:.8rem}
+.empty div{font-size:1.8rem;margin-bottom:.3rem}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:.85rem;margin-bottom:.85rem}
+.cc{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:.95rem}
+.bc{display:flex;flex-direction:column;gap:.42rem;margin-top:.58rem}
+.br{display:flex;align-items:center;gap:.58rem}
+.bl{font-size:.66rem;color:var(--t2);width:72px;text-align:right;flex-shrink:0}
+.bt{flex:1;height:17px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.bf{height:100%;border-radius:4px;transition:width .8s ease;display:flex;align-items:center;justify-content:flex-end;padding-left:5px;font-size:.61rem;font-weight:700;color:#fff}
+.sr{display:flex;justify-content:space-between;align-items:center;padding:.42rem 0;border-bottom:1px solid var(--border)}
+.sr:last-child{border-bottom:none}
+.sk{font-size:.73rem;color:var(--t2)}
+.sv{font-size:.8rem;font-weight:700}
+.al{background:rgba(232,93,93,.1);border:1px solid rgba(232,93,93,.3);border-radius:8px;padding:.58rem .88rem;margin-bottom:.65rem;font-size:.75rem;color:var(--rc);display:none;align-items:center;gap:.42rem}
+.al.show{display:flex}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,20,.85);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;width:100%;max-width:760px;max-height:90vh;overflow-y:auto;padding:1.4rem}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.95rem}
+.modal-hdr h2{font-size:.97rem;font-weight:700;color:var(--gold)}
+.modal-close{background:transparent;border:1px solid var(--border);color:var(--t2);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--rc);border-color:var(--rc);color:#fff}
+.notif-bell{position:relative;cursor:pointer;background:transparent;border:1px solid var(--border);color:var(--t2);padding:.32rem .6rem;border-radius:6px;font-size:.88rem;transition:all .2s}
+.notif-bell:hover{border-color:var(--orange);color:var(--orange)}
+.nc{position:absolute;top:-6px;left:-6px;background:var(--rc);color:#fff;border-radius:50%;width:15px;height:15px;font-size:.58rem;font-weight:700;display:none;align-items:center;justify-content:center}
+.np{position:absolute;top:38px;left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;width:300px;max-height:380px;overflow-y:auto;z-index:300;box-shadow:0 8px 30px rgba(0,0,40,.7);display:none}
+.np.open{display:block}
+.ni{padding:.7rem .95rem;border-bottom:1px solid var(--border);font-size:.76rem}
+.ni:last-child{border-bottom:none}
+.ni .nt{font-weight:700;color:var(--t1);margin-bottom:.18rem}
+.ni .nb2{color:var(--t2);font-size:.7rem;line-height:1.5}
+.ni.crit .nt{color:var(--rc)}.ni.high .nt{color:var(--rh)}.ni.warn .nt{color:var(--rm)}
+.ai-panel{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;overflow:hidden}
+.ai-hdr{background:linear-gradient(135deg,#1a1a4a,#2a1a5a);padding:.75rem 1.05rem;display:flex;align-items:center;gap:.65rem;border-bottom:1px solid var(--border)}
+.ai-av{width:34px;height:34px;background:linear-gradient(135deg,var(--purple),#6a4fd4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.ai-msgs{height:320px;overflow-y:auto;padding:.85rem;display:flex;flex-direction:column;gap:.65rem}
+.msg{display:flex;gap:.48rem;align-items:flex-start;max-width:92%}
+.msg.user{flex-direction:row-reverse;align-self:flex-end}
+.mb{background:var(--bg4);border:1px solid var(--border);border-radius:12px;padding:.58rem .85rem;font-size:.77rem;line-height:1.65;color:var(--t1)}
+.msg.user .mb{background:linear-gradient(135deg,#1a3a6a,#2a4a8a);border-color:var(--border2)}
+.mav{width:25px;height:25px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0;margin-top:2px}
+.msg.ai .mav{background:linear-gradient(135deg,var(--purple),#6a4fd4)}
+.msg.user .mav{background:linear-gradient(135deg,var(--blue),#2278c4)}
+.ai-inp-row{padding:.65rem .88rem;border-top:1px solid var(--border);display:flex;gap:.48rem;align-items:center;background:var(--bg4)}
+.ai-inp{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--t1);padding:.48rem .75rem;font-family:'Cairo',sans-serif;font-size:.8rem}
+.ai-inp:focus{outline:none;border-color:var(--purple)}
+.btn-ai{background:linear-gradient(135deg,var(--purple),#6a4fd4);border:none;color:#fff;padding:.48rem .95rem;border-radius:7px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:.76rem;font-weight:700;white-space:nowrap;transition:all .2s}
+.btn-ai:hover{transform:translateY(-1px)}
+.btn-ai:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.qbs{display:flex;gap:.32rem;padding:.52rem .88rem;border-top:1px solid var(--border);flex-wrap:wrap;background:var(--bg4)}
+.qb{background:transparent;border:1px solid rgba(155,127,232,.3);color:rgba(155,127,232,.8);padding:.2rem .62rem;border-radius:20px;cursor:pointer;font-size:.66rem;font-family:'Cairo',sans-serif;transition:all .15s}
+.qb:hover{background:rgba(155,127,232,.15);color:var(--purple)}
+.typing{display:flex;align-items:center;gap:.28rem;padding:.38rem}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--purple);animation:bnc .8s infinite}
+.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+@keyframes bnc{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.rpt-types{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:.72rem;margin-bottom:1.1rem}
+.rpt-card{background:var(--bg3);border:2px solid var(--border);border-radius:10px;padding:.9rem;cursor:pointer;transition:all .2s;text-align:center}
+.rpt-card:hover,.rpt-card.selected{border-color:var(--blue)}
+.rpt-card.selected{border-color:var(--gold);background:rgba(240,192,64,.05)}
+.rpt-icon{font-size:1.65rem;margin-bottom:.35rem}
+.rpt-name{font-size:.8rem;font-weight:700;color:var(--t1);margin-bottom:.18rem}
+.rpt-desc{font-size:.66rem;color:var(--t2)}
+.rpt-builder{background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.rpt-toggle{display:flex;align-items:center;justify-content:space-between;padding:.45rem .65rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;cursor:pointer;transition:background .15s;margin-bottom:.35rem}
+.rpt-toggle:hover{background:rgba(58,157,225,.07)}
+.rpt-toggle span{font-size:.78rem;color:var(--t1)}
+.tsw{width:34px;height:18px;background:var(--border);border-radius:9px;position:relative;transition:background .2s;flex-shrink:0}
+.tsw.on{background:var(--blue)}
+.tsw::after{content:'';position:absolute;top:3px;right:3px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .2s}
+.tsw.on::after{transform:translateX(-16px)}
+.rpt-preview{background:#fff;color:#111;border-radius:10px;padding:1.8rem;margin-top:.9rem;direction:rtl;font-family:'Cairo',sans-serif;min-height:380px}
+.rpt-preview h2{font-size:1.1rem;font-weight:900;color:#0a1628;margin-bottom:.9rem;text-align:center;border-bottom:3px solid #f0c040;padding-bottom:.55rem}
+.rpt-preview h3{font-size:.9rem;font-weight:700;color:#0a1628;margin:.85rem 0 .38rem}
+.rpt-preview table{width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:.6rem}
+.rpt-preview th{background:#0a1628;color:#fff;padding:.45rem .65rem;text-align:right;font-size:.7rem}
+.rpt-preview td{padding:.42rem .65rem;border-bottom:1px solid #dee2e6}
+.rpt-preview tr:nth-child(even) td{background:#f8f9fa}
+.rpt-preview .sig{margin-top:1.8rem;text-align:left;font-size:.77rem;color:#555;border-top:1px solid #dee2e6;padding-top:.65rem}
+@media print{body *{visibility:hidden}.rpt-preview,.rpt-preview *{visibility:visible}.rpt-preview{position:fixed;inset:0;margin:0;padding:1.5rem;border-radius:0}}
+.imp-zone{border:2px dashed var(--border2);border-radius:10px;padding:1.6rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg4)}
+.imp-zone:hover,.imp-zone.drag{border-color:var(--teal);background:rgba(31,198,192,.05)}
+.pb{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:.45rem}
+.pf{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:3px;transition:width .4s}
+.fin-card{background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:.8rem;margin-bottom:.52rem}
+.fin-card h4{font-size:.76rem;font-weight:700;color:var(--gold);margin-bottom:.42rem;display:flex;align-items:center;gap:.32rem}
+.rs{display:flex;align-items:center;gap:.42rem;padding:.32rem 0;border-bottom:1px solid var(--border);font-size:.73rem}
+.rs:last-child{border-bottom:none}
+.rs-ic{font-size:.82rem;flex-shrink:0}
+.rs-tx{flex:1;color:var(--t2)}
+.rs-lv{font-weight:700;font-size:.66rem}
+.mth{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:.95rem}
+.mth h3{font-size:.82rem;font-weight:700;color:var(--gold);margin-bottom:.58rem;display:flex;align-items:center;gap:.32rem}
+.mth p{font-size:.74rem;color:var(--t2);line-height:1.7}
+.formula{background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:.55rem;margin-top:.55rem;font-family:'Tajawal',monospace;font-size:.8rem;color:var(--teal);text-align:center}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.65rem}
+.di{background:var(--bg4);border:1px solid var(--border);border-radius:7px;padding:.72rem}
+.di .dl{font-size:.63rem;color:var(--t2);text-transform:uppercase;font-weight:600;margin-bottom:.22rem}
+.di .dv{font-size:.82rem;font-weight:600;color:var(--t1)}
+.hist-item{padding:.45rem .65rem;border-bottom:1px solid var(--border);font-size:.73rem;color:var(--t2)}
+.hist-item strong{color:var(--t1)}
+.tag{display:inline-block;padding:.12rem .42rem;border-radius:4px;font-size:.6rem;font-weight:700;margin-right:.22rem}
+.tag-ai{background:rgba(155,127,232,.18);color:var(--purple);border:1px solid rgba(155,127,232,.3)}
+.tag-n{background:rgba(240,192,64,.18);color:var(--gold);border:1px solid rgba(240,192,64,.3)}
+.tag-f{background:rgba(31,198,192,.18);color:var(--teal);border:1px solid rgba(31,198,192,.3)}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:.85rem 1.2rem;text-align:center;margin-top:2rem}
+.fsig{font-size:.73rem;color:var(--t2);line-height:1.8}
+.fsig strong{color:var(--gold);font-size:.8rem}
+.fsig span{color:var(--teal)}
+</style>
+</head>
+<body><header>
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-ico">🛡️</div>
+    <div>
+      <h1>نظام إدارة المخاطر المؤسسي <span class="tag tag-ai">AI</span><span class="tag tag-n">v3</span><span class="tag tag-f">مكتمل</span></h1>
+      <p>Enterprise Risk Management — تنبيهات تلقائية | تعديل المخاطر | تقارير قابلة للتخصيص</p>
+    </div>
+  </div>
+  <nav>
+    <button class="nb active" onclick="showTab('dash')">📊 لوحة المتابعة</button>
+    <button class="nb" onclick="showTab('reg')">📋 السجل</button>
+    <button class="nb" onclick="showTab('add')">➕ إضافة/تعديل</button>
+    <button class="nb" onclick="showTab('imp')">📥 استيراد</button>
+    <button class="nb" onclick="showTab('fin')">💹 القوائم المالية</button>
+    <button class="nb" onclick="showTab('ai')">🤖 مستشار AI</button>
+    <button class="nb" onclick="showTab('rpts')">📄 التقارير</button>
+    <button class="nb" onclick="showTab('hm')">🔥 خريطة الحرارة</button>
+    <button class="nb" onclick="showTab('stats')">📈 إحصاء</button>
+    <button class="nb" onclick="showTab('mth')">📚 المنهجية</button>
+    <button class="nb" onclick="showTab('guide')">📖 دليل الاستخدام</button>
+  </nav>
+  <div class="hdr-acts">
+    <button class="notif-bell" id="nbell" onclick="toggleNotif()">🔔<span class="nc" id="nc">0</span></button>
+    <div class="np" id="npanel">
+      <div style="padding:.65rem .95rem;border-bottom:1px solid var(--border);font-size:.76rem;font-weight:700;color:var(--gold)">🔔 التنبيهات التلقائية</div>
+      <div id="nlist"></div>
+    </div>
+    <button class="btn-g" onclick="exportExcel()">💾 Excel</button>
+  </div>
+</div>
+</header>
+
+<div class="layout">
+
+<!-- DASHBOARD -->
+<div id="tab-dash" class="tab active">
+  <div id="al" class="al"><span>⚠️</span><span id="al-msg"></span></div>
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div class="cg">
+    <div class="cc"><div class="st">📊 توزيع الخطورة</div><div class="bc" id="ch-sev"></div></div>
+    <div class="cc"><div class="st">🏷️ توزيع الفئات</div><div class="bc" id="ch-cat"></div></div>
+    <div class="cc"><div class="st">🔧 حالة الإجراءات</div><div class="bc" id="ch-act"></div></div>
+    <div class="cc"><div class="st">🎯 مؤشرات KRI</div><div id="kri-p" style="margin-top:.55rem"></div></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="tab-reg" class="tab">
+  <div class="tw">
+    <div class="ttb">
+      <div class="st" style="margin:0;border:none;padding:0">📋 سجل المخاطر الكامل</div>
+      <div style="display:flex;gap:.55rem;align-items:center;flex-wrap:wrap">
+        <input class="si" id="srch" placeholder="🔍 ابحث..." oninput="renderTable()">
+        <div class="fc-bar">
+          <button class="fc active" onclick="setF('all',this)">الكل</button>
+          <button class="fc c-crit" onclick="setF('بالغ',this)">بالغ</button>
+          <button class="fc c-high" onclick="setF('عالٍ',this)">عالٍ</button>
+          <button class="fc c-med" onclick="setF('متوسط',this)">متوسط</button>
+          <button class="fc c-low" onclick="setF('منخفض',this)">منخفض</button>
+        </div>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr>
+          <th>#</th><th>رمز</th><th>اسم الخطر</th><th>الفئة</th>
+          <th>احتمالية</th><th>تأثير</th><th>الدرجة</th><th>الخطورة</th>
+          <th>الإجراء</th><th>الحالة</th><th>المسؤول</th><th>المراجعة</th><th>⚙️</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT -->
+<div id="tab-add" class="tab">
+  <div class="card">
+    <div class="st" id="form-title">➕ تسجيل مخاطرة جديدة</div>
+    <div class="fgrid">
+      <div class="fg"><label>رمز الخطر *</label><input id="f-id" placeholder="R-001"/></div>
+      <div class="fg"><label>اسم الخطر *</label><input id="f-name" placeholder="وصف موجز للخطر"/></div>
+      <div class="fg"><label>فئة الخطر</label>
+        <select id="f-cat"><option value="">— اختر —</option><option>مالية</option><option>تشغيلية</option><option>سوقية</option><option>ائتمانية</option><option>تقنية</option><option>قانونية وامتثال</option><option>استراتيجية</option><option>سمعة</option><option>موارد بشرية</option></select>
+      </div>
+      <div class="fg"><label>النوع</label>
+        <select id="f-type"><option value="">—</option><option>خطر (Risk)</option><option>حادثة (Incident)</option><option>مشكلة (Issue)</option><option>فرصة (Opportunity)</option></select>
+      </div>
+      <div class="fg full"><label>السبب الجذري</label><input id="f-cause" placeholder="ما الذي يسبب هذا الخطر؟"/></div>
+      <div class="fg full"><label>وصف الخطر</label><textarea id="f-desc" placeholder="شرح تفصيلي..."></textarea></div>
+      <div class="fg"><label>الاحتمالية (1–5) *</label>
+        <select id="f-prob" onchange="calcScore()"><option value="">—</option><option value="1">1 - نادر جداً</option><option value="2">2 - نادر</option><option value="3">3 - محتمل</option><option value="4">4 - مرجح</option><option value="5">5 - مؤكد</option></select>
+      </div>
+      <div class="fg"><label>التأثير (1–5) *</label>
+        <select id="f-imp" onchange="calcScore()"><option value="">—</option><option value="1">1 - ضئيل جداً</option><option value="2">2 - ضئيل</option><option value="3">3 - متوسط</option><option value="4">4 - كبير</option><option value="5">5 - كارثي</option></select>
+      </div>
+      <div class="fg"><label>الدرجة (محسوبة)</label>
+        <div class="score-row"><div class="score-box" id="score-box">—</div><div id="lvl-badge"></div></div>
+      </div>
+      <div class="fg"><label>استراتيجية المعالجة</label>
+        <select id="f-action"><option value="">—</option><option>تجنب (Avoid)</option><option>تخفيف (Mitigate)</option><option>تحويل (Transfer)</option><option>قبول (Accept)</option></select>
+      </div>
+      <div class="fg"><label>الحالة</label>
+        <select id="f-status"><option value="">—</option><option>مفتوح</option><option>قيد التنفيذ</option><option>مغلق</option><option>مؤجل</option></select>
+      </div>
+      <div class="fg"><label>المسؤول</label><input id="f-owner" placeholder="اسم المسؤول أو القسم"/></div>
+      <div class="fg"><label>تاريخ الرصد</label><input type="date" id="f-date"/></div>
+      <div class="fg"><label>تاريخ المراجعة</label><input type="date" id="f-rev"/></div>
+      <div class="fg"><label>التكلفة التقديرية (ج.م)</label><input type="number" id="f-cost" placeholder="0" min="0"/></div>
+      <div class="fg full"><label>خطة المعالجة</label><textarea id="f-plan" placeholder="خطوات المعالجة والجدول الزمني..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:.65rem;flex-wrap:wrap">
+      <button class="btn-p" id="save-btn" onclick="saveRisk()">💾 حفظ في السجل</button>
+      <button class="btn-w" id="cancel-btn" onclick="cancelEdit()" style="display:none">✕ إلغاء التعديل</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT -->
+<div id="tab-imp" class="tab">
+  <div class="card">
+    <div class="st">📥 استيراد من Excel / CSV</div>
+    <div class="imp-zone" id="impz" onclick="document.getElementById('fimp').click()"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handleDrop(event)">
+      <div style="font-size:2rem;margin-bottom:.38rem">📂</div>
+      <h3 style="font-size:.88rem;color:var(--teal);margin-bottom:.28rem">اسحب الملف هنا أو انقر للاختيار</h3>
+      <p style="font-size:.73rem;color:var(--t2)">يدعم .xlsx / .xls / .csv</p>
+    </div>
+    <input type="file" id="fimp" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileImport(this.files[0])">
+    <div id="imprev" style="display:none;margin-top:.95rem">
+      <div class="st">🗂️ معاينة وربط الأعمدة</div>
+      <div id="prevtbl" style="overflow-x:auto;margin-bottom:.75rem"></div>
+      <div class="fgrid" id="colmap"></div>
+      <div style="margin-top:.75rem;display:flex;gap:.55rem;flex-wrap:wrap">
+        <button class="btn-p" onclick="execImport()">✅ استيراد الآن</button>
+        <button class="btn-s" onclick="resetImp()">🔄 إعادة تعيين</button>
+      </div>
+      <div id="impprog" style="display:none;margin-top:.55rem">
+        <div style="font-size:.73rem;color:var(--teal);margin-bottom:.22rem" id="impmsg"></div>
+        <div class="pb"><div class="pf" id="impbar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="st">📋 تحميل قالب Excel الفارغ</div>
+    <p style="font-size:.76rem;color:var(--t2);margin-bottom:.65rem">قالب جاهز بالأعمدة الصحيحة لإدخال بياناتك</p>
+    <button class="btn-s" onclick="dlTpl()">⬇️ تحميل القالب</button>
+  </div>
+</div>
+
+<!-- FINANCIAL -->
+<div id="tab-fin" class="tab">
+
+  <!-- MODE SWITCHER -->
+  <div class="card" style="margin-bottom:.7rem">
+    <div class="st">💹 تحليل القوائم المالية — استخراج المخاطر الكامنة <span class="tag tag-ai">AI</span></div>
+    <p style="font-size:.76rem;color:var(--t2);margin-bottom:.9rem">اختر طريقة الإدخال: رفع ملف Excel مباشرةً أو إدخال الأرقام يدوياً</p>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem">
+      <button class="btn-p" id="mode-upload-btn" onclick="setFinMode('upload')" style="margin-top:0">📂 رفع ملف Excel / PDF</button>
+      <button class="btn-s" id="mode-manual-btn" onclick="setFinMode('manual')" style="background:var(--bg4);border:1px solid var(--border);color:var(--t2)">⌨️ إدخال يدوي</button>
+    </div>
+  </div>
+
+  <!-- UPLOAD MODE -->
+  <div id="fin-upload-mode" class="card">
+    <div class="st">📂 رفع ملف القوائم المالية</div>
+    <p style="font-size:.76rem;color:var(--t2);margin-bottom:.8rem">
+      يدعم النظام ملفات Excel (.xlsx / .xls) التي تحتوي على أرقام القوائم المالية.<br>
+      سيقوم النظام بالبحث تلقائياً عن الأرقام المالية الأساسية وملء الحقول.
+    </p>
+
+    <!-- Upload Zone -->
+    <div class="imp-zone" id="fin-dropzone"
+      onclick="document.getElementById('fin-file-inp').click()"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="handleFinDrop(event)">
+      <div style="font-size:2rem;margin-bottom:.35rem">📊</div>
+      <h3 style="font-size:.88rem;color:var(--teal);margin-bottom:.28rem">اسحب ملف Excel هنا أو انقر للاختيار</h3>
+      <p style="font-size:.72rem;color:var(--t2)">يدعم: .xlsx / .xls</p>
+    </div>
+    <input type="file" id="fin-file-inp" accept=".xlsx,.xls" style="display:none" onchange="handleFinFile(this.files[0])">
+
+    <!-- Detected Data Preview -->
+    <div id="fin-detected" style="display:none;margin-top:1rem">
+      <div class="st">✅ البيانات المكتشفة من الملف</div>
+      <div id="fin-detected-grid" class="fgrid" style="margin-bottom:.8rem"></div>
+      <div style="background:rgba(31,198,192,.08);border:1px solid rgba(31,198,192,.3);border-radius:8px;padding:.7rem .9rem;font-size:.76rem;color:var(--teal);margin-bottom:.8rem" id="fin-detect-msg"></div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn-p" id="btn-fin" onclick="analyzeFin()">🤖 تحليل واستخراج المخاطر بالذكاء الاصطناعي</button>
+        <button class="btn-s" onclick="setFinMode('manual')">✏️ تعديل الأرقام يدوياً</button>
+      </div>
+    </div>
+
+    <!-- Sample Template Download -->
+    <div style="margin-top:1rem;padding:.7rem .9rem;background:var(--bg4);border:1px solid var(--border);border-radius:8px">
+      <div style="font-size:.76rem;color:var(--t2);margin-bottom:.5rem">💡 ليس لديك نموذج جاهز؟ حمّل نموذج القوائم المالية:</div>
+      <button class="btn-s" onclick="dlFinTemplate()">⬇️ تحميل نموذج Excel للقوائم المالية</button>
+    </div>
+  </div>
+
+  <!-- MANUAL MODE -->
+  <div id="fin-manual-mode" class="card" style="display:none">
+    <div class="st">⌨️ إدخال أرقام القوائم المالية يدوياً</div>
+    <div class="fgrid">
+      <div class="fg"><label>نوع الشركة</label>
+        <select id="fin-sec"><option>مقاولات وإنشاءات</option><option>تجارة وتوزيع</option><option>تصنيع</option><option>خدمات مالية</option><option>عقارات</option><option>أخرى</option></select>
+      </div>
+      <div class="fg"><label>الإيرادات / المبيعات (ج.م)</label><input type="number" id="fi-rev" placeholder="0"/></div>
+      <div class="fg"><label>تكلفة المبيعات</label><input type="number" id="fi-cogs" placeholder="0"/></div>
+      <div class="fg"><label>مجمل الربح</label><input type="number" id="fi-gp" placeholder="0"/></div>
+      <div class="fg"><label>صافي الربح</label><input type="number" id="fi-profit" placeholder="0"/></div>
+      <div class="fg"><label>الذمم المدينة (العملاء)</label><input type="number" id="fi-ar" placeholder="0"/></div>
+      <div class="fg"><label>المخزون</label><input type="number" id="fi-inv" placeholder="0"/></div>
+      <div class="fg"><label>النقدية والبنوك</label><input type="number" id="fi-cash" placeholder="0"/></div>
+      <div class="fg"><label>إجمالي الأصول المتداولة</label><input type="number" id="fi-ca" placeholder="0"/></div>
+      <div class="fg"><label>إجمالي الأصول</label><input type="number" id="fi-assets" placeholder="0"/></div>
+      <div class="fg"><label>الذمم الدائنة (الموردون)</label><input type="number" id="fi-ap" placeholder="0"/></div>
+      <div class="fg"><label>إجمالي الالتزامات المتداولة</label><input type="number" id="fi-cl" placeholder="0"/></div>
+      <div class="fg"><label>إجمالي الديون والقروض</label><input type="number" id="fi-debt" placeholder="0"/></div>
+      <div class="fg"><label>حقوق الملكية</label><input type="number" id="fi-equity" placeholder="0"/></div>
+      <div class="fg"><label>أيام التحصيل DSO (اختياري)</label><input type="number" id="fi-dso" placeholder="احسبه تلقائياً"/></div>
+      <div class="fg"><label>مصاريف الفوائد</label><input type="number" id="fi-int" placeholder="0"/></div>
+      <div class="fg"><label>التدفق النقدي التشغيلي</label><input type="number" id="fi-ocf" placeholder="0"/></div>
+    </div>
+    <button class="btn-p" id="btn-fin-manual" onclick="analyzeFin()" style="margin-top:.8rem">🤖 تحليل واستخراج المخاطر</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="fin-res" style="display:none">
+    <div class="cg" id="fin-rats"></div>
+    <div id="fin-rl"></div>
+    <div style="display:flex;gap:.6rem;margin-top:.7rem;flex-wrap:wrap">
+      <button class="btn-s" onclick="addFinRisks()">➕ إضافة إلى سجل المخاطر</button>
+      <button class="btn-g" onclick="exportFinExcel()">💾 تصدير التحليل Excel</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI -->
+<div id="tab-ai" class="tab">
+  <div class="g2" style="align-items:start;gap:.9rem">
+    <div>
+      <div class="ai-panel">
+        <div class="ai-hdr">
+          <div class="ai-av">🤖</div>
+          <div>
+            <div style="font-size:.86rem;font-weight:700;color:var(--t1)">مستشار إدارة المخاطر — Claude AI</div>
+            <div style="font-size:.64rem;color:var(--t2)">يقرأ سجلك الحالي ويجيب في سياق شركتك</div>
+          </div>
+        </div>
+        <div class="ai-msgs" id="ai-msgs">
+          <div class="msg ai"><div class="mav">🤖</div>
+            <div class="mb">مرحباً 👋<br><br>أنا مستشارك في إدارة المخاطر المؤسسية. أقرأ سجل مخاطرك الحالي وأجيب في سياق بيئة عملك الفعلية.<br><br>يمكنني مساعدتك في تحليل المخاطر، خطط المعالجة، القوائم المالية، ومنهجيات ERM الاحترافية.</div>
+          </div>
+        </div>
+        <div class="qbs">
+          <button class="qb" onclick="quickQ('حلل مخاطري الحالية وأعطني أولويات المعالجة')">تحليل سجلي</button>
+          <button class="qb" onclick="quickQ('ما هي المخاطر البالغة وكيف أعالجها فوراً؟')">المخاطر البالغة</button>
+          <button class="qb" onclick="quickQ('اشرح الفرق بين Risk Appetite و Risk Tolerance')">Appetite vs Tolerance</button>
+          <button class="qb" onclick="quickQ('كيف أبني KRI فعّال لشركة مقاولات مصرية؟')">KRI للمقاولات</button>
+        </div>
+        <div class="ai-inp-row">
+          <input class="ai-inp" id="ai-inp" placeholder="اكتب سؤالك..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI()}">
+          <button class="btn-ai" id="btn-ai" onclick="sendAI()">إرسال ➤</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="st">📂 مخاطري الحالية (السياق)</div>
+        <div id="ai-ctx" style="font-size:.73rem;color:var(--t2)"></div>
+      </div>
+      <div class="card" style="margin-top:.75rem">
+        <div class="st">💡 أسئلة متقدمة</div>
+        <div style="display:flex;flex-direction:column;gap:.38rem">
+          <button class="qb" style="text-align:right;padding:.42rem .72rem;border-radius:7px" onclick="quickQ('كيف أربط مخاطر المخزون بالميزانية في شركة مقاولات؟')">🔗 ربط المخزون بالميزانية</button>
+          <button class="qb" style="text-align:right;padding:.42rem .72rem;border-radius:7px" onclick="quickQ('اعمل Monte Carlo مبسط لتقدير الخسارة المتوقعة من مخاطري')">🎲 Monte Carlo مبسط</button>
+          <button class="qb" style="text-align:right;padding:.42rem .72rem;border-radius:7px" onclick="quickQ('كيف أدمج Risk Engine داخل نظام ERP؟')">🔧 دمج المخاطر في ERP</button>
+          <button class="qb" style="text-align:right;padding:.42rem .72rem;border-radius:7px" onclick="quickQ('ما مؤشرات الإنذار المبكر KRI للسيولة؟')">💧 KRI للسيولة</button>
+          <button class="qb" style="text-align:right;padding:.42rem .72rem;border-radius:7px" onclick="quickQ('فسر نتائج الانحراف المعياري لمخاطري بأسلوب إداري')">📐 الانحراف المعياري إداريًا</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REPORTS -->
+<div id="tab-rpts" class="tab">
+  <div class="card">
+    <div class="st">📄 مصمم التقارير القابل للتخصيص <span class="tag tag-n">جديد</span></div>
+    <p style="font-size:.76rem;color:var(--t2);margin-bottom:.95rem">اختر نوع التقرير ثم فعّل أو أوقف أي قسم تريده:</p>
+    <div class="rpt-types">
+      <div class="rpt-card selected" onclick="selectRpt('full',this)"><div class="rpt-icon">📊</div><div class="rpt-name">تقرير شامل</div><div class="rpt-desc">كل الأقسام — للإدارة العليا</div></div>
+      <div class="rpt-card" onclick="selectRpt('liquidity',this)"><div class="rpt-icon">💧</div><div class="rpt-name">تقرير السيولة</div><div class="rpt-desc">مخاطر النقدية والتمويل</div></div>
+      <div class="rpt-card" onclick="selectRpt('credit',this)"><div class="rpt-icon">🏦</div><div class="rpt-name">تقرير الائتمان</div><div class="rpt-desc">مخاطر الذمم والعملاء</div></div>
+      <div class="rpt-card" onclick="selectRpt('operational',this)"><div class="rpt-icon">⚙️</div><div class="rpt-name">تقرير تشغيلي</div><div class="rpt-desc">مخاطر العمليات والموارد</div></div>
+      <div class="rpt-card" onclick="selectRpt('executive',this)"><div class="rpt-icon">👔</div><div class="rpt-name">ملخص تنفيذي</div><div class="rpt-desc">ملخص مختصر للمدير العام</div></div>
+      <div class="rpt-card" onclick="selectRpt('kri',this)"><div class="rpt-icon">🎯</div><div class="rpt-name">تقرير KRI</div><div class="rpt-desc">مؤشرات الإنذار المبكر</div></div>
+      <div class="rpt-card" onclick="selectRpt('custom',this)"><div class="rpt-icon">🛠️</div><div class="rpt-name">تقرير مخصص</div><div class="rpt-desc">اختر الأقسام يدوياً</div></div>
+    </div>
+    <div class="g2" style="align-items:start">
+      <div class="rpt-builder">
+        <div class="st">🔧 أقسام التقرير</div>
+        <div id="rpt-toggles"></div>
+        <div style="margin-top:.9rem;display:flex;gap:.55rem;flex-wrap:wrap">
+          <button class="btn-p" onclick="buildReport()">👁️ معاينة</button>
+          <button class="btn-s" onclick="printReport()">🖨️ طباعة/PDF</button>
+          <button class="btn-g" onclick="exportRptExcel()">💾 Excel</button>
+        </div>
+      </div>
+      <div class="rpt-builder">
+        <div class="st">🏢 بيانات التقرير</div>
+        <div style="display:flex;flex-direction:column;gap:.55rem">
+          <div class="fg"><label>اسم الشركة</label><input id="rco" placeholder="اسم الشركة"/></div>
+          <div class="fg"><label>الفترة الزمنية</label><input id="rper" placeholder="الربع الأول 2025"/></div>
+          <div class="fg"><label>معد التقرير</label><input id="raut" value="عبد الفتاح قشطي"/></div>
+          <div class="fg"><label>ملاحظات</label><textarea id="rnotes" placeholder="توصيات..." style="min-height:52px"></textarea></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="rpt-wrap" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem">
+      <div class="st" style="margin:0;border:none;padding:0">👁️ معاينة التقرير</div>
+      <div style="display:flex;gap:.45rem"><button class="btn-s" onclick="printReport()">🖨️ طباعة</button><button class="btn-g" onclick="exportRptExcel()">💾 Excel</button></div>
+    </div>
+    <div class="rpt-preview" id="rpt-prev"></div>
+  </div>
+</div>
+
+<!-- HEATMAP -->
+<div id="tab-hm" class="tab">
+  <div class="card">
+    <div class="st">🔥 خريطة الحرارة — مصفوفة 5×5</div>
+    <div style="display:flex;gap:.32rem;margin-bottom:.65rem;flex-wrap:wrap">
+      <span class="chip c-low">● منخفض 1–4</span><span class="chip c-med">● متوسط 5–9</span>
+      <span class="chip c-high">● عالٍ 10–16</span><span class="chip c-crit">● بالغ 17–25</span>
+    </div>
+    <div id="hm-wrap"></div>
+  </div>
+  <div class="tw">
+    <div class="ttb"><div class="st" style="margin:0;border:none;padding:0">المخاطر مرتبة حسب الدرجة</div></div>
+    <div style="overflow-x:auto">
+      <table><thead><tr><th>رمز</th><th>اسم الخطر</th><th>الفئة</th><th>احتمالية</th><th>تأثير</th><th>الدرجة</th><th>المستوى</th></tr></thead>
+      <tbody id="hm-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div id="tab-stats" class="tab">
+  <div class="cg">
+    <div class="cc"><div class="st">📐 الإحصاء الوصفي</div><div id="desc-stats"></div></div>
+    <div class="cc"><div class="st">💰 التكاليف المالية</div><div class="bc" id="cost-chart" style="margin-top:.55rem"></div></div>
+  </div>
+  <div class="card">
+    <div class="st">🎭 تحليل السيناريوهات — What-If</div>
+    <div class="fgrid">
+      <div class="fg"><label>تغيير الاحتمالية: <span id="pv">0%</span></label>
+        <input type="range" style="width:100%;height:5px;-webkit-appearance:none;background:var(--border2);border:none;padding:0;border-radius:3px" id="psl" min="-50" max="50" value="0" oninput="document.getElementById('pv').textContent=(this.value>=0?'+':'')+this.value+'%';updSc()">
+      </div>
+      <div class="fg"><label>تغيير التأثير: <span id="iv">0%</span></label>
+        <input type="range" style="width:100%;height:5px;-webkit-appearance:none;background:var(--border2);border:none;padding:0;border-radius:3px" id="isl" min="-50" max="50" value="0" oninput="document.getElementById('iv').textContent=(this.value>=0?'+':'')+this.value+'%';updSc()">
+      </div>
+    </div>
+    <div class="g4" id="sc-cards" style="margin-top:.85rem"></div>
+  </div>
+</div>
+
+<!-- METHODOLOGY -->
+<div id="tab-mth" class="tab">
+  <div class="g3">
+    <div class="mth"><h3>🎯 معادلة تقييم الخطر</h3><p>يُحسب مستوى الخطر بضرب الاحتمالية في التأثير. النتيجة من 1 إلى 25 على مصفوفة خريطة الحرارة وفق معيار ISO 31000.</p><div class="formula">درجة المخاطرة = الاحتمالية × التأثير</div></div>
+    <div class="mth"><h3>📊 مصفوفة التصنيف ISO 31000</h3><div style="margin-top:.55rem;display:flex;flex-direction:column;gap:.28rem"><div class="chip c-low" style="display:block">1–4 : منخفض — مراقبة دورية</div><div class="chip c-med" style="display:block">5–9 : متوسط — خطة تخفيف</div><div class="chip c-high" style="display:block">10–16 : عالٍ — إجراء فوري</div><div class="chip c-crit" style="display:block">17–25 : بالغ — تصعيد للإدارة العليا</div></div></div>
+    <div class="mth"><h3>🔄 استراتيجيات المعالجة 4T</h3><p><strong style="color:var(--red)">Terminate:</strong> وقف النشاط.<br><strong style="color:var(--orange)">Treat:</strong> تخفيف الاحتمالية أو التأثير.<br><strong style="color:var(--blue)">Transfer:</strong> تأمين أو تعاقد خارجي.<br><strong style="color:var(--green)">Tolerate:</strong> قبول ومراقبة.</p></div>
+    <div class="mth"><h3>📈 مؤشرات KRI</h3><p>الـ KRI مؤشر إنذار مبكر يُنبّه قبل وقوع الخطر بوقت كافٍ للتدخل.</p><div class="formula">KRI = الانحراف ÷ الحد المقبول × 100</div></div>
+    <div class="mth"><h3>🎲 الإحصاء الجوهري لمدير المخاطر</h3><p><strong>Expected Loss</strong> = احتمال × تأثير مالي<br><strong>VaR₉₅</strong> = μ − 1.645 × σ<br><strong>CV</strong> = σ ÷ μ × 100 (تشتت المخاطر)<br><strong>Z-Score</strong> = (x − μ) ÷ σ</p></div>
+    <div class="mth"><h3>🔗 المخاطر في القوائم المالية</h3><div style="font-size:.71rem;color:var(--t2)"><div style="padding:.26rem 0;border-bottom:1px solid var(--border)">📌 الذمم المدينة ← خطر ائتماني</div><div style="padding:.26rem 0;border-bottom:1px solid var(--border)">📌 المخزون ← تدهور الأسعار</div><div style="padding:.26rem 0;border-bottom:1px solid var(--border)">📌 النقدية ← خطر السيولة</div><div style="padding:.26rem 0;border-bottom:1px solid var(--border)">📌 الديون ← أسعار الفائدة</div><div style="padding:.26rem 0">📌 العقود ← خطر التنفيذ والغرامات</div></div></div>
+    <div class="mth"><h3>🏗️ COSO ERM Framework</h3><p>8 مكونات: البيئة الداخلية، تحديد الأهداف، الأحداث، التقييم، الاستجابة، الرقابة، المعلومات، والمراقبة.</p></div>
+    <div class="mth"><h3>📉 Monte Carlo للمخاطر</h3><p>محاكاة آلاف السيناريوهات لتوزيع الخسائر المحتملة. تُستخدم في VaR وتحليل الحساسية.</p><div class="formula">VaR₉₅ = μ − 1.645 × σ</div></div>
+    <div class="mth"><h3>🏦 Basel III — أنواع المخاطر</h3><p><strong>مخاطر الائتمان:</strong> عدم السداد.<br><strong>مخاطر السوق:</strong> تغير الأسعار والأسعار.<br><strong>مخاطر التشغيل:</strong> الأخطاء والاحتيال والأنظمة.</p></div>
+  </div>
+</div>
+
+
+<!-- GUIDE -->
+<div id="tab-guide" class="tab">
+  <div class="card">
+    <div class="st">📖 دليل الاستخدام السريع</div>
+    <p style="font-size:.8rem;color:var(--t2);margin-bottom:1rem;line-height:1.9">
+      هذا النظام مفتوح المصدر للاستخدام العام — يعمل بالكامل في المتصفح بدون تثبيت أي برنامج.
+      البيانات تُحفظ على جهازك أنت فقط ولا يطلع عليها أحد.
+    </p>
+    <div class="g3">
+
+      <div class="mth"><h3>🚀 البداية السريعة</h3>
+        <p>١. ستجد <strong>10 مخاطر نموذجية</strong> جاهزة من بيئة المقاولات للاستئناس بها.<br><br>
+        ٢. اذهب إلى <strong>➕ إضافة</strong> لتسجيل مخاطرك الحقيقية.<br><br>
+        ٣. كل خطر يحتاج: الرمز، الاسم، الاحتمالية (1-5)، التأثير (1-5) — والباقي اختياري.<br><br>
+        ٤. الدرجة تُحسب تلقائياً بمجرد اختيار الاحتمالية والتأثير.</p>
+      </div>
+
+      <div class="mth"><h3>📋 سجل المخاطر</h3>
+        <p>اضغط على <strong>اسم أي خطر</strong> لعرض تفاصيله الكاملة وتعديله.<br><br>
+        زر <strong>✏️</strong> للتعديل المباشر.<br><br>
+        زر <strong>👁️</strong> لعرض التفاصيل وسجل التغييرات.<br><br>
+        استخدم <strong>الفلاتر</strong> للتصفية حسب مستوى الخطورة.<br><br>
+        🔔 <strong>الجرس</strong> في الأعلى يُنبّهك تلقائياً بالمخاطر البالغة والمراجعات المتأخرة.</p>
+      </div>
+
+      <div class="mth"><h3>📥 استيراد البيانات</h3>
+        <p>لو عندك ملف Excel فيه مخاطر مسجلة مسبقاً:<br><br>
+        ١. اذهب إلى تبويب <strong>📥 استيراد</strong>.<br><br>
+        ٢. ارفع الملف أو اسحبه.<br><br>
+        ٣. حدد أي عمود في ملفك يقابل أي حقل.<br><br>
+        ٤. اضغط استيراد — النظام يقرأ الملف ويضيف المخاطر تلقائياً.<br><br>
+        يمكنك تحميل <strong>قالب Excel جاهز</strong> من نفس الصفحة.</p>
+      </div>
+
+      <div class="mth"><h3>💹 القوائم المالية</h3>
+        <p>النظام يستخرج المخاطر الكامنة من أرقامك المالية:<br><br>
+        <strong>طريقة ١:</strong> ارفع ملف Excel للميزانية أو قائمة الدخل — النظام يكتشف الأرقام تلقائياً.<br><br>
+        <strong>طريقة ٢:</strong> أدخل الأرقام يدوياً في الحقول.<br><br>
+        بعدها اضغط <strong>"تحليل بالذكاء الاصطناعي"</strong> — ويرجعلك قائمة المخاطر مربوطة بالأرقام الفعلية.<br><br>
+        ⚠️ <strong>ملاحظة:</strong> الذكاء الاصطناعي يعمل فقط لو الملف مرفوع على سيرفر (مش file://).</p>
+      </div>
+
+      <div class="mth"><h3>📄 التقارير</h3>
+        <p>اذهب إلى تبويب <strong>📄 التقارير</strong> واختر نوع التقرير:<br><br>
+        • <strong>تقرير السيولة</strong> — للمخاطر المالية والنقدية<br>
+        • <strong>تقرير الائتمان</strong> — للذمم والعملاء<br>
+        • <strong>ملخص تنفيذي</strong> — للمدير العام<br>
+        • <strong>تقرير مخصص</strong> — تختار الأقسام بنفسك<br><br>
+        ثم اضغط <strong>معاينة</strong> أو <strong>طباعة/PDF</strong> أو <strong>تصدير Excel</strong>.</p>
+      </div>
+
+      <div class="mth"><h3>🤖 مستشار الذكاء الاصطناعي</h3>
+        <p>المستشار يقرأ سجل مخاطرك الحالي ويجيب في سياق بيئة عملك.<br><br>
+        اسأله مثلاً:<br>
+        • "حلل مخاطري وأعطني أولويات المعالجة"<br>
+        • "ما خطة معالجة مناسبة لـ R-002؟"<br>
+        • "اشرح Value at Risk بمثال من مخاطري"<br>
+        • "كيف أربط هذه المخاطر بالميزانية؟"<br><br>
+        ⚠️ يعمل فقط على سيرفر وليس على file://</p>
+      </div>
+
+      <div class="mth"><h3>💾 حفظ البيانات ونقلها</h3>
+        <p>البيانات تُحفظ تلقائياً في متصفحك — لا تحتاج ضغط أي زر.<br><br>
+        لنقل البيانات لجهاز آخر:<br>
+        ١. اضغط <strong>💾 Excel</strong> في الأعلى لتصدير كل البيانات.<br><br>
+        ٢. في الجهاز الجديد اذهب إلى <strong>📥 استيراد</strong> وارفع الملف.<br><br>
+        لمسح كل البيانات والبدء من جديد، اكتب في Console المتصفح:<br></p>
+        <div class="formula" style="font-size:.72rem;text-align:right;direction:ltr">localStorage.removeItem('erm_v3'); location.reload();</div>
+      </div>
+
+      <div class="mth"><h3>⚠️ تنبيه مهم — الخصوصية</h3>
+        <p>• بياناتك تُحفظ على <strong>جهازك فقط</strong> ولا يراها أحد.<br><br>
+        • عند استخدام تحليل AI، الأرقام المالية فقط تُرسل لـ Claude API بشكل مشفر ومؤقت ولا تُحفظ.<br><br>
+        • صاحب الموقع <strong>لا يرى أي بيانات</strong> من مستخدمي النظام إطلاقاً.<br><br>
+        • النظام مفتوح للاستخدام العام بدون قيود.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</div><!-- /layout -->
+
+<!-- DETAIL MODAL -->
+<div class="modal-bg" id="dmodal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2 id="dtitle">تفاصيل المخاطرة</h2>
+      <button class="modal-close" onclick="closeM()">✕</button>
+    </div>
+    <div id="dbody"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="fsig">
+    <strong>عبد الفتاح قشطي</strong><br>
+    <span>مطور نظم ورقابة مالية — المنظومة الحديثة للإدارة المالية</span><br>
+    <a href="https://www.linkedin.com/in/a-fattah-kishty/" target="_blank" style="color:var(--blue);font-size:.73rem;text-decoration:none">🔗 linkedin.com/in/a-fattah-kishty</a><br>
+    <span style="color:var(--t3);font-size:.63rem">ERM Pro v3.0 | AI-Powered | SQLite | نظام مفتوح للاستخدام العام</span>
+  </div>
+</footer>
+<script>
+// ══ DB ══
+let db=null,DBR=false;const SK='erm_v3';
+async function initDB(){
+  const SQL=await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`});
+  const sv=localStorage.getItem(SK);
+  db=sv?new SQL.Database(new Uint8Array(JSON.parse(sv))):new SQL.Database();
+  db.run(`CREATE TABLE IF NOT EXISTS risks(id TEXT PRIMARY KEY,name TEXT,category TEXT,type TEXT,cause TEXT,description TEXT,probability INTEGER,impact INTEGER,score INTEGER,level TEXT,action TEXT,status TEXT,owner TEXT,date_added TEXT,review_date TEXT,cost REAL,plan TEXT)`);
+  db.run(`CREATE TABLE IF NOT EXISTS hist(id INTEGER PRIMARY KEY AUTOINCREMENT,risk_id TEXT,action TEXT,ts TEXT,details TEXT)`);
+  DBR=true;svDB();refreshAll();
+}
+function svDB(){if(!db)return;localStorage.setItem(SK,JSON.stringify(Array.from(db.export())));}
+function all(){
+  if(!DBR)return[];
+  const r=db.exec("SELECT * FROM risks ORDER BY score DESC");
+  if(!r.length)return[];
+  return r[0].values.map(row=>{const o={};r[0].columns.forEach((c,i)=>o[c]=row[i]);return o;});
+}
+function logH(rid,act,det){db.run("INSERT INTO hist(risk_id,action,ts,details) VALUES(?,?,?,?)",[rid,act,new Date().toISOString(),det]);}
+
+// ══ NAV ══
+function showTab(n){
+  document.querySelectorAll('.tab').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  document.querySelectorAll('.nb').forEach(b=>{if(b.getAttribute('onclick')?.includes("'"+n+"'"))b.classList.add('active');});
+  if(n==='hm')renderHM();if(n==='stats')renderStats();
+  if(n==='dash')renderDash();if(n==='reg')renderTable();
+  if(n==='ai')updAICtx();if(n==='rpts')initToggles('full');
+}
+
+// ══ HELPERS ══
+function lvl(s){if(s>=17)return'بالغ';if(s>=10)return'عالٍ';if(s>=5)return'متوسط';return'منخفض';}
+function cls(l){return{بالغ:'crit',عالٍ:'high',متوسط:'med',منخفض:'low'}[l]||'low';}
+function clr(l){return{بالغ:'var(--rc)',عالٍ:'var(--rh)',متوسط:'var(--rm)',منخفض:'var(--rl)'}[l]||'var(--rl)';}
+function gv(id){return document.getElementById(id)?.value?.trim()||'';}
+function sv2(id,v){const e=document.getElementById(id);if(e)e.value=v||'';}
+
+function calcScore(){
+  const p=+gv('f-prob')||0,i=+gv('f-imp')||0,s=p*i;
+  const el=document.getElementById('score-box'),bd=document.getElementById('lvl-badge');
+  if(s>0){const l=lvl(s);el.textContent=s;el.style.color=clr(l);el.style.borderColor=clr(l);bd.innerHTML=`<span class="chip c-${cls(l)}">${l}</span>`;}
+  else{el.textContent='—';el.style.color='';el.style.borderColor='';bd.innerHTML='';}
+}
+
+// ══ SAVE / EDIT / DELETE ══
+let editMode=false,editOrigId='';
+
+function saveRisk(rObj){
+  const r=rObj||{id:gv('f-id'),name:gv('f-name'),category:gv('f-cat'),type:gv('f-type'),cause:gv('f-cause'),description:gv('f-desc'),probability:+gv('f-prob')||0,impact:+gv('f-imp')||0,action:gv('f-action'),status:gv('f-status'),owner:gv('f-owner'),date_added:gv('f-date')||new Date().toISOString().split('T')[0],review_date:gv('f-rev'),cost:+gv('f-cost')||0,plan:gv('f-plan')};
+  if(!r.id||!r.name||!r.probability||!r.impact){if(!rObj)alert('يرجى ملء: رمز الخطر، الاسم، الاحتمالية، التأثير');return false;}
+  r.score=r.probability*r.impact;r.level=lvl(r.score);
+  if(editMode&&editOrigId&&editOrigId!==r.id){db.run("DELETE FROM risks WHERE id=?",[editOrigId]);}
+  try{
+    db.run(`INSERT OR REPLACE INTO risks VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[r.id,r.name,r.category,r.type,r.cause,r.description,r.probability,r.impact,r.score,r.level,r.action,r.status,r.owner,r.date_added,r.review_date,r.cost,r.plan]);
+    if(!rObj)logH(r.id,editMode?'تعديل':'إضافة',`درجة الخطر: ${r.score}`);
+    svDB();refreshAll();
+    if(!rObj){cancelEdit();showTab('reg');}
+    return true;
+  }catch(e){if(!rObj)alert('خطأ: رمز الخطر مستخدم بالفعل');return false;}
+}
+
+function editRisk(id){
+  const r=all().find(x=>x.id===id);if(!r)return;
+  editMode=true;editOrigId=id;
+  sv2('f-id',r.id);sv2('f-name',r.name);sv2('f-cat',r.category);sv2('f-type',r.type);
+  sv2('f-cause',r.cause);sv2('f-desc',r.description);sv2('f-prob',r.probability);
+  sv2('f-imp',r.impact);sv2('f-action',r.action);sv2('f-status',r.status);
+  sv2('f-owner',r.owner);sv2('f-date',r.date_added);sv2('f-rev',r.review_date);
+  sv2('f-cost',r.cost);sv2('f-plan',r.plan);
+  calcScore();
+  document.getElementById('form-title').textContent='✏️ تعديل المخاطرة — '+id;
+  document.getElementById('save-btn').textContent='💾 حفظ التعديلات';
+  document.getElementById('cancel-btn').style.display='flex';
+  showTab('add');window.scrollTo(0,0);
+}
+
+function cancelEdit(){
+  editMode=false;editOrigId='';
+  ['f-id','f-name','f-cat','f-type','f-cause','f-desc','f-prob','f-imp','f-action','f-status','f-owner','f-date','f-rev','f-cost','f-plan'].forEach(id=>sv2(id,''));
+  calcScore();
+  document.getElementById('form-title').textContent='➕ تسجيل مخاطرة جديدة';
+  document.getElementById('save-btn').textContent='💾 حفظ في السجل';
+  document.getElementById('cancel-btn').style.display='none';
+  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+}
+
+function deleteRisk(id){
+  if(!confirm('حذف هذه المخاطرة؟'))return;
+  db.run("DELETE FROM risks WHERE id=?",[id]);logH(id,'حذف','');svDB();refreshAll();
+}
+
+function viewDetail(id){
+  const r=all().find(x=>x.id===id);if(!r)return;
+  const l=lvl(r.score),c=cls(l);
+  let hist='';
+  try{const hr=db.exec("SELECT * FROM hist WHERE risk_id=? ORDER BY ts DESC LIMIT 5",[id]);
+    if(hr.length&&hr[0].values.length)hist='<div class="st" style="margin-top:.9rem">📜 سجل التغييرات</div>'+hr[0].values.map(h=>`<div class="hist-item"><strong>${h[2]}</strong> — ${new Date(h[3]).toLocaleString('ar-EG')} — ${h[4]||''}</div>`).join('');}catch(e){}
+  document.getElementById('dtitle').textContent=`${r.id}: ${r.name}`;
+  document.getElementById('dbody').innerHTML=`
+    <div style="margin-bottom:.9rem;display:flex;gap:.45rem;align-items:center;flex-wrap:wrap">
+      <span class="chip c-${c}" style="font-size:.8rem;padding:.28rem .75rem">${l}</span>
+      <span style="font-size:.8rem;color:var(--t2)">الدرجة: <strong style="color:${clr(l)};font-size:1.15rem">${r.score}</strong></span>
+      <span style="font-size:.75rem;color:var(--t3)">احتمالية: ${r.probability} × تأثير: ${r.impact}</span>
+    </div>
+    <div class="detail-grid">
+      <div class="di"><div class="dl">الفئة</div><div class="dv">${r.category||'—'}</div></div>
+      <div class="di"><div class="dl">النوع</div><div class="dv">${r.type||'—'}</div></div>
+      <div class="di"><div class="dl">الحالة</div><div class="dv">${r.status||'—'}</div></div>
+      <div class="di"><div class="dl">المسؤول</div><div class="dv">${r.owner||'—'}</div></div>
+      <div class="di"><div class="dl">تاريخ الرصد</div><div class="dv">${r.date_added||'—'}</div></div>
+      <div class="di"><div class="dl">تاريخ المراجعة</div><div class="dv">${r.review_date||'—'}</div></div>
+      <div class="di"><div class="dl">التكلفة التقديرية</div><div class="dv" style="color:var(--gold)">${(r.cost||0).toLocaleString('ar-EG')} ج.م</div></div>
+      <div class="di"><div class="dl">الإجراء التصحيحي</div><div class="dv">${r.action||'—'}</div></div>
+    </div>
+    ${r.cause?`<div class="di" style="margin-top:.6rem;border-radius:7px"><div class="dl">السبب الجذري</div><div class="dv" style="font-size:.77rem;font-weight:400;line-height:1.6">${r.cause}</div></div>`:''}
+    ${r.description?`<div class="di" style="margin-top:.45rem;border-radius:7px"><div class="dl">الوصف</div><div class="dv" style="font-size:.77rem;font-weight:400;line-height:1.6">${r.description}</div></div>`:''}
+    ${r.plan?`<div class="di" style="margin-top:.45rem;border-radius:7px"><div class="dl">خطة المعالجة</div><div class="dv" style="font-size:.77rem;font-weight:400;line-height:1.6">${r.plan}</div></div>`:''}
+    ${hist}
+    <div style="margin-top:.9rem;display:flex;gap:.45rem">
+      <button class="btn-p" onclick="closeM();editRisk('${r.id}')">✏️ تعديل</button>
+      <button class="btn-w" onclick="closeM();deleteRisk('${r.id}')">🗑️ حذف</button>
+    </div>`;
+  document.getElementById('dmodal').classList.add('open');
+}
+
+function closeM(){document.getElementById('dmodal').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+// ══ TABLE ══
+let curF='all';
+function setF(f,el){curF=f;document.querySelectorAll('.fc').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderTable();}
+function renderTable(){
+  let risks=all();
+  const s=(document.getElementById('srch')?.value||'').toLowerCase();
+  if(curF!=='all')risks=risks.filter(r=>r.level===curF);
+  if(s)risks=risks.filter(r=>(r.name||'').toLowerCase().includes(s)||(r.id||'').toLowerCase().includes(s)||(r.category||'').toLowerCase().includes(s));
+  const tb=document.getElementById('tbody');
+  if(!risks.length){tb.innerHTML=`<tr><td colspan="13"><div class="empty"><div>📭</div>لا توجد نتائج</div></td></tr>`;return;}
+  tb.innerHTML=risks.map((r,i)=>`<tr>
+    <td style="color:var(--t3)">${i+1}</td>
+    <td><strong style="color:var(--teal)">${r.id}</strong></td>
+    <td><span style="cursor:pointer;color:var(--blue)" onclick="viewDetail('${r.id}')">${r.name}</span></td>
+    <td style="font-size:.7rem;color:var(--t2)">${r.category||'—'}</td>
+    <td style="text-align:center"><strong style="color:var(--blue)">${r.probability}</strong></td>
+    <td style="text-align:center"><strong style="color:var(--orange)">${r.impact}</strong></td>
+    <td style="text-align:center;font-weight:900;color:${clr(r.level)}">${r.score}</td>
+    <td><span class="chip c-${cls(r.level)}">${r.level}</span></td>
+    <td style="font-size:.7rem">${r.action||'—'}</td>
+    <td style="font-size:.7rem">${r.status||'—'}</td>
+    <td style="font-size:.7rem">${r.owner||'—'}</td>
+    <td style="font-size:.66rem;color:var(--t3)">${r.review_date||'—'}</td>
+    <td>
+      <button class="ab edt" onclick="editRisk('${r.id}')">✏️</button>
+      <button class="ab" onclick="viewDetail('${r.id}')">👁️</button>
+      <button class="ab del" onclick="deleteRisk('${r.id}')">🗑️</button>
+    </td>
+  </tr>`).join('');
+}
+
+// ══ DASHBOARD ══
+function renderDash(){
+  const risks=all(),n=risks.length;
+  const cr=risks.filter(r=>r.level==='بالغ').length,hi=risks.filter(r=>r.level==='عالٍ').length;
+  const op=risks.filter(r=>r.status==='مفتوح').length;
+  const cost=risks.reduce((s,r)=>s+(r.cost||0),0);
+  const due=risks.filter(r=>r.review_date&&new Date(r.review_date)<=new Date()).length;
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi" style="--ac:var(--blue)"><div class="kpi-lbl">إجمالي المخاطر</div><div class="kpi-val" style="--vc:var(--blue)">${n}</div><div class="kpi-sub">في السجل</div></div>
+    <div class="kpi" style="--ac:var(--rc)"><div class="kpi-lbl">مخاطر بالغة</div><div class="kpi-val" style="--vc:var(--rc)">${cr}</div><div class="kpi-sub">تصعيد فوري</div></div>
+    <div class="kpi" style="--ac:var(--rh)"><div class="kpi-lbl">مخاطر عالية</div><div class="kpi-val" style="--vc:var(--rh)">${hi}</div><div class="kpi-sub">إجراء عاجل</div></div>
+    <div class="kpi" style="--ac:var(--orange)"><div class="kpi-lbl">مفتوحة</div><div class="kpi-val" style="--vc:var(--orange)">${op}</div><div class="kpi-sub">لم تُعالج</div></div>
+    <div class="kpi" style="--ac:var(--gold)"><div class="kpi-lbl">إجمالي التكلفة</div><div class="kpi-val" style="--vc:var(--gold);font-size:1.02rem">${cost.toLocaleString('ar-EG')}</div><div class="kpi-sub">ج.م — تقدير</div></div>
+    <div class="kpi" style="--ac:var(--purple)"><div class="kpi-lbl">مراجعات متأخرة</div><div class="kpi-val" style="--vc:var(--purple)">${due}</div><div class="kpi-sub">تجاوزت تاريخها</div></div>`;
+  const al=document.getElementById('al');
+  if(cr>0||due>0){document.getElementById('al-msg').textContent=`${cr>0?cr+' مخاطر بالغة تستوجب تدخل الإدارة العليا فوراً':''}${cr>0&&due>0?' | ':''}${due>0?due+' مراجعة متأخرة':''}`;al.classList.add('show');}
+  else al.classList.remove('show');
+  document.getElementById('ch-sev').innerHTML=bChart([{l:'بالغ',c:cr,col:'var(--rc)'},{l:'عالٍ',c:hi,col:'var(--rh)'},{l:'متوسط',c:risks.filter(r=>r.level==='متوسط').length,col:'var(--rm)'},{l:'منخفض',c:risks.filter(r=>r.level==='منخفض').length,col:'var(--rl)'}],n);
+  const cats={};risks.forEach(r=>{const c=r.category||'غير محدد';cats[c]=(cats[c]||0)+1;});
+  document.getElementById('ch-cat').innerHTML=bChart(Object.entries(cats).map(([l,c])=>({l,c,col:'var(--blue)'})).sort((a,b)=>b.c-a.c),n);
+  const acts={مفتوح:0,'قيد التنفيذ':0,مغلق:0,مؤجل:0};risks.forEach(r=>{if(acts[r.status]!==undefined)acts[r.status]++;});
+  document.getElementById('ch-act').innerHTML=bChart([{l:'مفتوح',c:acts['مفتوح'],col:'var(--rc)'},{l:'قيد التنفيذ',c:acts['قيد التنفيذ'],col:'var(--rm)'},{l:'مغلق',c:acts['مغلق'],col:'var(--rl)'},{l:'مؤجل',c:acts['مؤجل'],col:'var(--t3)'}],n);
+  document.getElementById('kri-p').innerHTML=n?`
+    <div class="sr"><span class="sk">معدل البالغة</span><span class="sv" style="color:var(--rc)">${(cr/n*100).toFixed(1)}%</span></div>
+    <div class="sr"><span class="sk">نسبة المفتوحة</span><span class="sv" style="color:var(--orange)">${(op/n*100).toFixed(1)}%</span></div>
+    <div class="sr"><span class="sk">متوسط درجة الخطر</span><span class="sv">${(risks.reduce((s,r)=>s+r.score,0)/n).toFixed(1)}</span></div>
+    <div class="sr"><span class="sk">Expected Loss</span><span class="sv" style="color:var(--gold)">${risks.reduce((s,r)=>s+(r.cost||0)*(r.probability/5),0).toLocaleString('ar-EG')} ج.م</span></div>`
+  :'<div style="color:var(--t3);font-size:.75rem">أضف مخاطر لعرض المؤشرات</div>';
+  updNotif();
+}
+
+function bChart(data,total){
+  if(!total)return'<div style="color:var(--t3);font-size:.73rem">لا توجد بيانات</div>';
+  return data.map(d=>`<div class="br"><div class="bl">${d.l}</div><div class="bt"><div class="bf" style="width:${total?Math.max(3,d.c/total*100):0}%;background:${d.col}">${d.c>0?d.c:''}</div></div></div>`).join('');
+}
+
+// ══ NOTIFICATIONS ══
+function updNotif(){
+  const risks=all(),notifs=[];
+  risks.filter(r=>r.level==='بالغ').forEach(r=>notifs.push({t:'crit',ti:`🚨 خطر بالغ: ${r.id}`,bo:`${r.name} — درجة ${r.score} — ${r.status||'مفتوح'}`}));
+  risks.filter(r=>r.level==='عالٍ'&&r.status==='مفتوح').forEach(r=>notifs.push({t:'high',ti:`⚠️ خطر عالٍ مفتوح: ${r.id}`,bo:`${r.name} — يستلزم إجراءً فورياً`}));
+  risks.filter(r=>r.review_date&&new Date(r.review_date)<=new Date()).forEach(r=>notifs.push({t:'warn',ti:`📅 مراجعة متأخرة: ${r.id}`,bo:`${r.name} — كانت مقررة ${r.review_date}`}));
+  const nc=document.getElementById('nc');nc.textContent=notifs.length;nc.style.display=notifs.length?'flex':'none';
+  document.getElementById('nlist').innerHTML=notifs.length?notifs.map(n=>`<div class="ni ${n.t}"><div class="nt">${n.ti}</div><div class="nb2">${n.bo}</div></div>`).join(''):'<div style="padding:.9rem;text-align:center;font-size:.76rem;color:var(--t3)">لا توجد تنبيهات حالياً ✅</div>';
+}
+function toggleNotif(){document.getElementById('npanel').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.notif-bell')&&!e.target.closest('.np'))document.getElementById('npanel').classList.remove('open');});
+
+// ══ HEATMAP ══
+function renderHM(){
+  const risks=all();
+  const pL=['','نادر','نادر نسبياً','محتمل','مرجح','مؤكد'];
+  const iL=['','ضئيل','ضئيل نسبياً','متوسط','كبير','كارثي'];
+  let h=`<div style="display:grid;grid-template-columns:60px repeat(5,1fr);grid-template-rows:repeat(5,55px) 42px;gap:3px">`;
+  for(let im=5;im>=1;im--){
+    h+=`<div style="display:flex;align-items:center;justify-content:flex-end;padding-left:5px;font-size:.6rem;color:var(--t2);text-align:right">${iL[im]}<br><small style="color:var(--t3)">(${im})</small></div>`;
+    for(let pr=1;pr<=5;pr++){
+      const s=pr*im,l=lvl(s),cr=risks.filter(r=>r.probability==pr&&r.impact==im);
+      const bg={منخفض:`rgba(46,201,126,${.1+s*.01})`,متوسط:`rgba(240,192,64,${.12+s*.01})`,عالٍ:`rgba(240,125,64,${.12+s*.01})`,بالغ:`rgba(232,93,93,${.1+s*.015})`}[l];
+      h+=`<div style="background:${bg};border:1px solid rgba(255,255,255,.06);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:${cr.length?'pointer':'default'}" onclick="${cr.length?`hmClick('${cr.map(r=>r.id).join(',')}')`:''}" title="${cr.map(r=>r.name).join(', ')||''}">
+        ${cr.length?`<span style="background:#fff;color:#07111f;border-radius:50%;width:19px;height:19px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900">${cr.length}</span>`:`<span style="font-size:.6rem;color:rgba(255,255,255,.2)">${s}</span>`}
+      </div>`;
+    }
+  }
+  h+=`<div></div>`;for(let pr=1;pr<=5;pr++)h+=`<div style="display:flex;align-items:flex-start;justify-content:center;padding-top:3px;font-size:.58rem;color:var(--t2);text-align:center">${pL[pr]}<br><span style="color:var(--t3)">(${pr})</span></div>`;
+  h+=`</div><div style="text-align:center;margin-top:.3rem;font-size:.62rem;color:var(--t3)">← احتمالية الوقوع →</div>`;
+  document.getElementById('hm-wrap').innerHTML=h;
+  const hmt=document.getElementById('hm-tbody');
+  if(!risks.length){hmt.innerHTML=`<tr><td colspan="7"><div class="empty"><div>📭</div>لا توجد بيانات</div></td></tr>`;return;}
+  hmt.innerHTML=risks.map(r=>`<tr onclick="viewDetail('${r.id}')" style="cursor:pointer"><td><strong style="color:var(--teal)">${r.id}</strong></td><td>${r.name}</td><td style="font-size:.7rem;color:var(--t2)">${r.category||'—'}</td><td style="text-align:center">${r.probability}</td><td style="text-align:center">${r.impact}</td><td style="text-align:center;font-weight:900;color:${clr(r.level)}">${r.score}</td><td><span class="chip c-${cls(r.level)}">${r.level}</span></td></tr>`).join('');
+}
+function hmClick(ids){
+  const arr=ids.split(','),risks=all().filter(r=>arr.includes(r.id));
+  if(risks.length===1){viewDetail(risks[0].id);return;}
+  document.getElementById('dtitle').textContent=`مخاطر في هذه الخلية (${risks.length})`;
+  document.getElementById('dbody').innerHTML=risks.map(r=>`<div class="di" style="margin-bottom:.45rem;cursor:pointer" onclick="closeM();viewDetail('${r.id}')"><div class="dl">${r.id}</div><div class="dv">${r.name} — <span class="chip c-${cls(r.level)}">${r.level}</span></div></div>`).join('');
+  document.getElementById('dmodal').classList.add('open');
+}
+
+// ══ STATS ══
+function renderStats(){
+  const risks=all(),scores=risks.map(r=>r.score),n=scores.length;
+  let sh='';
+  if(!n){sh='<div style="color:var(--t3);font-size:.75rem;padding:.3rem">أضف مخاطر أولاً</div>';}
+  else{
+    const mean=scores.reduce((a,b)=>a+b,0)/n;
+    const sorted=[...scores].sort((a,b)=>a-b);
+    const med=n%2===0?(sorted[n/2-1]+sorted[n/2])/2:sorted[Math.floor(n/2)];
+    const std=Math.sqrt(scores.reduce((s,x)=>s+Math.pow(x-mean,2),0)/n);
+    sh=`<div class="sr"><span class="sk">عدد المخاطر (N)</span><span class="sv">${n}</span></div>
+        <div class="sr"><span class="sk">المتوسط (μ)</span><span class="sv">${mean.toFixed(2)}</span></div>
+        <div class="sr"><span class="sk">الوسيط</span><span class="sv">${med.toFixed(1)}</span></div>
+        <div class="sr"><span class="sk">الانحراف المعياري (σ)</span><span class="sv">${std.toFixed(2)}</span></div>
+        <div class="sr"><span class="sk">معامل الاختلاف (CV)</span><span class="sv">${mean>0?(std/mean*100).toFixed(1):0}%</span></div>
+        <div class="sr"><span class="sk">أعلى درجة</span><span class="sv" style="color:var(--rc)">${Math.max(...scores)}</span></div>
+        <div class="sr"><span class="sk">أدنى درجة</span><span class="sv" style="color:var(--rl)">${Math.min(...scores)}</span></div>
+        <div class="sr"><span class="sk">Expected Loss</span><span class="sv" style="color:var(--gold)">${risks.reduce((s,r)=>s+(r.cost||0)*(r.probability/5),0).toLocaleString('ar-EG')} ج.م</span></div>`;
+  }
+  document.getElementById('desc-stats').innerHTML=sh;
+  const top=[...risks].sort((a,b)=>(b.cost||0)-(a.cost||0)).slice(0,6);const mc=top[0]?.cost||1;
+  document.getElementById('cost-chart').innerHTML=top.length?top.map(r=>`<div class="br"><div class="bl">${(r.id||'').substring(0,8)}</div><div class="bt"><div class="bf" style="width:${(r.cost||0)/mc*100}%;background:var(--orange)">${(r.cost||0).toLocaleString()}</div></div></div>`).join(''):'<div style="color:var(--t3);font-size:.75rem">لا توجد تكاليف</div>';
+  updSc();
+}
+function updSc(){
+  const risks=all(),pc=+document.getElementById('psl')?.value||0,ic=+document.getElementById('isl')?.value||0;
+  const scs=[{t:'الأساسي',pm:1,im:1,col:'var(--blue)',ic:'📊'},{t:'المعدل',pm:1+pc/100,im:1+ic/100,col:'var(--teal)',ic:'🔄'},{t:'المتفائل',pm:.7,im:.8,col:'var(--rl)',ic:'😊'},{t:'المتشائم',pm:1.3,im:1.2,col:'var(--rh)',ic:'😟'}];
+  document.getElementById('sc-cards').innerHTML=scs.map(sc=>{
+    const adj=risks.map(r=>Math.min(25,Math.round(Math.min(5,r.probability*sc.pm)*Math.min(5,r.impact*sc.im))));
+    const avg=adj.length?(adj.reduce((a,b)=>a+b,0)/adj.length).toFixed(1):'—';
+    return`<div style="background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:.85rem"><div style="font-size:.78rem;font-weight:700;color:${sc.col};margin-bottom:.55rem">${sc.ic} ${sc.t}</div><div class="sr"><span class="sk">متوسط الدرجة</span><span class="sv" style="color:${sc.col}">${avg}</span></div><div class="sr"><span class="sk">مخاطر بالغة</span><span class="sv" style="color:var(--rc)">${adj.filter(s=>s>=17).length}</span></div></div>`;
+  }).join('');
+}
+
+// ══ IMPORT ══
+let impData=null,impHdrs=[];
+function handleDrop(e){e.preventDefault();document.getElementById('impz').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleFileImport(f);}
+function handleFileImport(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const d=new Uint8Array(e.target.result),wb=XLSX.read(d,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]];
+    const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    if(json.length<2){alert('الملف فارغ');return;}
+    impHdrs=json[0].map(String);impData=json.slice(1);showImpPrev();
+  };
+  r.readAsArrayBuffer(file);
+}
+function showImpPrev(){
+  document.getElementById('imprev').style.display='block';
+  const rows=impData.slice(0,4);
+  let t=`<table style="font-size:.7rem;min-width:480px"><thead><tr>${impHdrs.map(c=>`<th style="background:var(--bg2);padding:.42rem .6rem;border:1px solid var(--border);color:var(--t2)">${c}</th>`).join('')}</tr></thead><tbody>`;
+  rows.forEach(row=>{t+=`<tr>${impHdrs.map((_,i)=>`<td style="padding:.32rem .6rem;border:1px solid var(--border);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${row[i]||''}</td>`).join('')}</tr>`;});
+  t+=`</tbody></table><div style="font-size:.66rem;color:var(--t3);margin-top:.22rem">أول 4 صفوف من ${impData.length}</div>`;
+  document.getElementById('prevtbl').innerHTML=t;
+  const flds=[{k:'id',l:'رمز الخطر *'},{k:'name',l:'اسم الخطر *'},{k:'category',l:'الفئة'},{k:'cause',l:'السبب'},{k:'probability',l:'الاحتمالية *'},{k:'impact',l:'التأثير *'},{k:'action',l:'الإجراء'},{k:'status',l:'الحالة'},{k:'owner',l:'المسؤول'},{k:'cost',l:'التكلفة'}];
+  const opts=`<option value="">— غير مرتبط —</option>`+impHdrs.map((h,i)=>`<option value="${i}">${h}</option>`).join('');
+  document.getElementById('colmap').innerHTML=flds.map(f=>`<div class="fg"><label>${f.l}</label><select id="mp-${f.k}">${opts}</select></div>`).join('');
+  flds.forEach(f=>{const a=impHdrs.findIndex(h=>h.toLowerCase().includes(f.k));if(a>=0)document.getElementById('mp-'+f.k).value=String(a);});
+}
+function execImport(){
+  if(!impData)return;
+  const gc=k=>{const v=document.getElementById('mp-'+k)?.value;return v!==''?+v:-1;};
+  const mp={id:gc('id'),name:gc('name'),cat:gc('category'),cause:gc('cause'),prob:gc('probability'),imp:gc('impact'),action:gc('action'),status:gc('status'),owner:gc('owner'),cost:gc('cost')};
+  if(mp.id<0||mp.name<0||mp.prob<0||mp.imp<0){alert('يرجى ربط الأعمدة الإلزامية');return;}
+  document.getElementById('impprog').style.display='block';
+  let ok=0,sk=0;
+  impData.forEach((row,i)=>{
+    const r={id:String(row[mp.id]||'').trim(),name:String(row[mp.name]||'').trim(),category:mp.cat>=0?String(row[mp.cat]||''):'',cause:mp.cause>=0?String(row[mp.cause]||''):'',probability:+row[mp.prob]||0,impact:+row[mp.imp]||0,action:mp.action>=0?String(row[mp.action]||''):'',status:mp.status>=0?String(row[mp.status]||''):'مفتوح',owner:mp.owner>=0?String(row[mp.owner]||''):'',cost:mp.cost>=0?+row[mp.cost]||0:0,type:'',description:'',date_added:new Date().toISOString().split('T')[0],review_date:'',plan:''};
+    if(!r.id||!r.name||!r.probability||!r.impact){sk++;return;}
+    r.score=r.probability*r.impact;r.level=lvl(r.score);
+    try{db.run(`INSERT OR REPLACE INTO risks VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,[r.id,r.name,r.category,r.type,r.cause,r.description,r.probability,r.impact,r.score,r.level,r.action,r.status,r.owner,r.date_added,r.review_date,r.cost,r.plan]);ok++;}catch(e){sk++;}
+    document.getElementById('impbar').style.width=Math.round((i+1)/impData.length*100)+'%';
+    document.getElementById('impmsg').textContent=`جارٍ الاستيراد... ${i+1}/${impData.length}`;
+  });
+  svDB();refreshAll();
+  document.getElementById('impmsg').textContent=`✅ تم استيراد ${ok} خطر — تخطي: ${sk}`;
+  setTimeout(()=>{resetImp();showTab('reg');},1600);
+}
+function resetImp(){impData=null;impHdrs=[];document.getElementById('imprev').style.display='none';document.getElementById('fimp').value='';document.getElementById('impprog').style.display='none';}
+function dlTpl(){
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([['رمز الخطر','اسم الخطر','الفئة','السبب','الاحتمالية (1-5)','التأثير (1-5)','الإجراء','الحالة','المسؤول','التكلفة'],['R-001','مثال: ارتفاع أسعار الخامات','تشغيلية','تقلبات السوق','3','4','تخفيف (Mitigate)','مفتوح','مدير المشتريات','50000']]);
+  ws['!cols']=[{wch:12},{wch:35},{wch:15},{wch:30},{wch:16},{wch:14},{wch:22},{wch:14},{wch:20},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws,'قالب المخاطر');XLSX.writeFile(wb,'قالب_سجل_المخاطر.xlsx');
+}
+
+// ══ FINANCIAL ANALYSIS ══
+let finBuf=[], finVals={};
+
+// Mode switcher
+function setFinMode(mode){
+  const up=document.getElementById('fin-upload-mode');
+  const mn=document.getElementById('fin-manual-mode');
+  const ubtn=document.getElementById('mode-upload-btn');
+  const mbtn=document.getElementById('mode-manual-btn');
+  if(mode==='upload'){
+    up.style.display='block';mn.style.display='none';
+    ubtn.style.background='linear-gradient(135deg,var(--blue),#2278c4)';ubtn.style.color='#fff';ubtn.style.border='none';
+    mbtn.style.background='var(--bg4)';mbtn.style.color='var(--t2)';mbtn.style.border='1px solid var(--border)';
+  }else{
+    up.style.display='none';mn.style.display='block';
+    mbtn.style.background='linear-gradient(135deg,var(--teal),#179e9a)';mbtn.style.color='#fff';mbtn.style.border='none';
+    ubtn.style.background='var(--bg4)';ubtn.style.color='var(--t2)';ubtn.style.border='1px solid var(--border)';
+    // Copy detected values to manual fields
+    if(finVals && Object.keys(finVals).length>0) fillManualFromVals(finVals);
+  }
+}
+
+// ── Excel File Upload ──
+function handleFinDrop(e){
+  e.preventDefault();
+  document.getElementById('fin-dropzone').classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f) handleFinFile(f);
+}
+
+function handleFinFile(file){
+  if(!file) return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(!['xlsx','xls'].includes(ext)){
+    alert('يرجى رفع ملف Excel بصيغة .xlsx أو .xls');
+    return;
+  }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=new Uint8Array(e.target.result);
+      const wb=XLSX.read(data,{type:'array'});
+      const detected=extractFinancialData(wb);
+      if(detected){
+        finVals=detected;
+        showDetectedData(detected);
+      } else {
+        alert('لم يتمكن النظام من استخراج البيانات تلقائياً.\nسيتم فتح نموذج الإدخال اليدوي.');
+        setFinMode('manual');
+      }
+    }catch(err){
+      alert('خطأ في قراءة الملف. تأكد أنه ملف Excel صحيح.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── Smart Data Extractor from Excel ──
+function extractFinancialData(wb){
+  const vals={};
+  // Keywords to search for in Arabic and English
+  const keywords={
+    rev:    ['إيرادات','مبيعات','revenue','sales','صافي المبيعات','إجمالي الإيرادات'],
+    cogs:   ['تكلفة المبيعات','تكلفة البضاعة','cost of sales','cogs','تكلفة الإنتاج'],
+    gp:     ['مجمل الربح','إجمالي الربح','gross profit'],
+    profit: ['صافي الربح','net profit','net income','الربح الصافي'],
+    ar:     ['ذمم مدينة','مدينون','accounts receivable','عملاء','مستحقات العملاء'],
+    inv:    ['مخزون','بضاعة','inventory','stock','بضائع'],
+    cash:   ['نقدية','نقد وبنوك','cash','بنوك','أرصدة نقدية'],
+    ca:     ['أصول متداولة','current assets','إجمالي الأصول المتداولة'],
+    assets: ['إجمالي الأصول','total assets','مجموع الأصول'],
+    ap:     ['ذمم دائنة','دائنون','accounts payable','موردون','مستحقات الموردين'],
+    cl:     ['التزامات متداولة','current liabilities','إجمالي الالتزامات المتداولة'],
+    debt:   ['قروض','ديون','loans','debt','اقتراض','تمويل'],
+    equity: ['حقوق الملكية','equity','رأس المال','حقوق المساهمين'],
+    int:    ['فوائد','interest','مصاريف التمويل'],
+    ocf:    ['تدفق نقدي','operating cash','التدفقات النقدية'],
+  };
+
+  let found=0;
+  wb.SheetNames.forEach(sheetName=>{
+    const ws=wb.Sheets[sheetName];
+    const json=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+    json.forEach(row=>{
+      row.forEach((cell,ci)=>{
+        if(typeof cell!=='string') return;
+        const cellLow=cell.toLowerCase().trim();
+        Object.entries(keywords).forEach(([key,kws])=>{
+          if(vals[key]) return; // already found
+          kws.forEach(kw=>{
+            if(cellLow.includes(kw.toLowerCase())){
+              // Look for a number in adjacent cells (right or left)
+              for(let offset of [1,2,-1,3,-2]){
+                const neighbor=row[ci+offset];
+                if(neighbor!==undefined&&neighbor!==''){
+                  const num=parseFloat(String(neighbor).replace(/,/g,'').replace(/[^\d.-]/g,''));
+                  if(!isNaN(num)&&num>0){
+                    vals[key]=num;found++;break;
+                  }
+                }
+              }
+            }
+          });
+        });
+      });
+    });
+  });
+
+  return found>=3 ? vals : null;
+}
+
+function showDetectedData(vals){
+  document.getElementById('fin-detected').style.display='block';
+  const labels={rev:'الإيرادات',cogs:'تكلفة المبيعات',gp:'مجمل الربح',profit:'صافي الربح',ar:'الذمم المدينة',inv:'المخزون',cash:'النقدية',ca:'الأصول المتداولة',assets:'إجمالي الأصول',ap:'الذمم الدائنة',cl:'الالتزامات المتداولة',debt:'إجمالي الديون',equity:'حقوق الملكية',int:'مصاريف الفوائد',ocf:'التدفق النقدي'};
+  const grid=document.getElementById('fin-detected-grid');
+  grid.innerHTML=Object.entries(vals).map(([k,v])=>`
+    <div class="di" style="border-color:rgba(31,198,192,.35)">
+      <div class="dl">${labels[k]||k}</div>
+      <div class="dv" style="color:var(--teal)">${v.toLocaleString('ar-EG')} ج.م</div>
+    </div>`).join('');
+  const cnt=Object.keys(vals).length;
+  document.getElementById('fin-detect-msg').innerHTML=`✅ تم اكتشاف <strong>${cnt} بند مالي</strong> من الملف تلقائياً. يمكنك المراجعة أو التعديل قبل التحليل.`;
+  fillManualFromVals(vals);
+}
+
+function fillManualFromVals(vals){
+  const map={rev:'fi-rev',cogs:'fi-cogs',gp:'fi-gp',profit:'fi-profit',ar:'fi-ar',inv:'fi-inv',cash:'fi-cash',ca:'fi-ca',assets:'fi-assets',ap:'fi-ap',cl:'fi-cl',debt:'fi-debt',equity:'fi-equity',int:'fi-int',ocf:'fi-ocf'};
+  Object.entries(map).forEach(([k,id])=>{if(vals[k]){const el=document.getElementById(id);if(el)el.value=vals[k];}});
+}
+
+// ── Collect all financial values ──
+function collectFinVals(){
+  const gn=id=>+document.getElementById(id)?.value||0;
+  const sec=document.getElementById('fin-sec')?.value||'مقاولات وإنشاءات';
+  return {
+    sec, rev:gn('fi-rev'), cogs:gn('fi-cogs'), gp:gn('fi-gp'),
+    profit:gn('fi-profit'), ar:gn('fi-ar'), inv:gn('fi-inv'),
+    cash:gn('fi-cash'), ca:gn('fi-ca'), assets:gn('fi-assets'),
+    ap:gn('fi-ap'), cl:gn('fi-cl'), debt:gn('fi-debt'),
+    equity:gn('fi-equity'), int:gn('fi-int'), ocf:gn('fi-ocf'),
+    dso:gn('fi-dso')
+  };
+}
+
+async function analyzeFin(){
+  // Make sure manual fields are visible for collection
+  setFinMode('manual');
+  const v=collectFinVals();
+  if(!v.rev&&!v.assets&&!v.ar){alert('يرجى إدخال أرقام القوائم المالية أولاً');return;}
+
+  const btn=document.getElementById('btn-fin-manual')||document.getElementById('btn-fin');
+  if(btn){btn.disabled=true;btn.textContent='⏳ جارٍ التحليل بالذكاء الاصطناعي...';}
+
+  // ── Calculate Ratios ──
+  const gm = v.rev>0 ? ((v.gp||(v.rev-v.cogs))/v.rev*100) : 0;
+  const pm = v.rev>0 ? (v.profit/v.rev*100) : 0;
+  const cr = v.cl>0 ? (v.ca||v.cash+v.ar+v.inv)/v.cl : (v.ap>0?(v.cash+v.ar+v.inv)/v.ap:0);
+  const qr = v.cl>0 ? (v.cash+v.ar)/v.cl : 0;
+  const dr = v.assets>0 ? v.debt/v.assets : 0;
+  const der= v.equity>0 ? v.debt/v.equity : 0;
+  const dsoC = v.dso || (v.rev>0&&v.ar>0 ? Math.round(v.ar/(v.rev/365)) : 0);
+  const dpo = v.cogs>0&&v.ap>0 ? Math.round(v.ap/(v.cogs/365)) : 0;
+  const roe = v.equity>0 ? (v.profit/v.equity*100) : 0;
+  const roa = v.assets>0 ? (v.profit/v.assets*100) : 0;
+  const icr = v.int>0 ? ((v.profit+v.int)/v.int) : 0;
+
+  // ── Show Ratios ──
+  document.getElementById('fin-res').style.display='block';
+  document.getElementById('fin-rats').innerHTML=`
+    <div class="cc"><div class="st">📊 نسب الربحية</div>
+      <div class="sr"><span class="sk">هامش الربح الإجمالي</span><span class="sv" style="color:${gm>20?'var(--rl)':gm>10?'var(--rm)':'var(--rh)'}">${gm.toFixed(1)}%</span></div>
+      <div class="sr"><span class="sk">هامش الربح الصافي</span><span class="sv" style="color:${pm>8?'var(--rl)':pm>3?'var(--rm)':'var(--rh)'}">${pm.toFixed(1)}%</span></div>
+      <div class="sr"><span class="sk">العائد على الأصول ROA</span><span class="sv" style="color:${roa>5?'var(--rl)':'var(--rm)'}">${roa.toFixed(1)}%</span></div>
+      <div class="sr"><span class="sk">العائد على الملكية ROE</span><span class="sv" style="color:${roe>10?'var(--rl)':'var(--rm)'}">${roe.toFixed(1)}%</span></div>
+    </div>
+    <div class="cc"><div class="st">💧 نسب السيولة</div>
+      <div class="sr"><span class="sk">نسبة التداول</span><span class="sv" style="color:${cr>1.5?'var(--rl)':cr>1?'var(--rm)':'var(--rc)'}">${cr.toFixed(2)}x</span></div>
+      <div class="sr"><span class="sk">نسبة السيولة السريعة</span><span class="sv" style="color:${qr>1?'var(--rl)':qr>.5?'var(--rm)':'var(--rc)'}">${qr.toFixed(2)}x</span></div>
+      <div class="sr"><span class="sk">أيام التحصيل DSO</span><span class="sv" style="color:${dsoC<45?'var(--rl)':dsoC<75?'var(--rm)':'var(--rh)'}">${dsoC} يوم</span></div>
+      <div class="sr"><span class="sk">أيام السداد DPO</span><span class="sv">${dpo} يوم</span></div>
+    </div>
+    <div class="cc"><div class="st">🏦 نسب الرفع المالي</div>
+      <div class="sr"><span class="sk">الديون / الأصول</span><span class="sv" style="color:${dr<.4?'var(--rl)':dr<.6?'var(--rm)':'var(--rc)'}">${(dr*100).toFixed(1)}%</span></div>
+      <div class="sr"><span class="sk">الديون / حقوق الملكية</span><span class="sv" style="color:${der<1?'var(--rl)':der<2?'var(--rm)':'var(--rc)'}">${der.toFixed(2)}x</span></div>
+      <div class="sr"><span class="sk">نسبة تغطية الفوائد ICR</span><span class="sv" style="color:${icr>3?'var(--rl)':icr>1.5?'var(--rm)':'var(--rc)'}">${icr.toFixed(2)}x</span></div>
+    </div>`;
+
+  // ── AI Analysis ──
+  const prompt=`أنت خبير إدارة مخاطر مالية متخصص في الأسواق المصرية. حلل القوائم المالية التالية لشركة ${v.sec} واستخرج المخاطر الكامنة.
+
+البيانات المالية:
+- الإيرادات: ${v.rev.toLocaleString()} ج.م
+- تكلفة المبيعات: ${v.cogs.toLocaleString()} ج.م
+- صافي الربح: ${v.profit.toLocaleString()} ج.م
+- الذمم المدينة: ${v.ar.toLocaleString()} ج.م
+- المخزون: ${v.inv.toLocaleString()} ج.م
+- النقدية: ${v.cash.toLocaleString()} ج.م
+- إجمالي الأصول: ${v.assets.toLocaleString()} ج.م
+- إجمالي الديون: ${v.debt.toLocaleString()} ج.م
+- حقوق الملكية: ${v.equity.toLocaleString()} ج.م
+- أيام التحصيل DSO: ${dsoC} يوم
+
+النسب المحسوبة:
+- هامش الربح الإجمالي: ${gm.toFixed(1)}%
+- هامش الربح الصافي: ${pm.toFixed(1)}%
+- نسبة التداول: ${cr.toFixed(2)}
+- نسبة الديون للأصول: ${(dr*100).toFixed(1)}%
+- نسبة الديون لحقوق الملكية: ${der.toFixed(2)}
+- نسبة تغطية الفوائد: ${icr.toFixed(2)}
+
+أرجع JSON فقط بدون أي نص إضافي:
+{"risks":[{"id":"FIN-001","name":"اسم الخطر","category":"الفئة","cause":"السبب المالي المحدد من الأرقام","probability":رقم1إلى5,"impact":رقم1إلى5,"action":"الاستراتيجية","owner":"الجهة المسؤولة","cost":التكلفة_التقديرية,"analysis":"تحليل مختصر يربط الخطر بالرقم المالي المحدد"}]}`;
+
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1200,messages:[{role:"user",content:prompt}]})});
+    const data=await resp.json();
+    const text=data.content?.map(c=>c.text||'').join('');
+    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+    finBuf=parsed.risks||[];
+  }catch(e){
+    finBuf=genLocalFin(v.ar,v.inv,v.cash,v.debt,v.assets,dsoC,dr,cr,v.rev,v.profit);
+  }
+  renderFinRisks();
+  if(btn){btn.disabled=false;btn.textContent='🤖 تحليل واستخراج المخاطر';}
+}
+
+function genLocalFin(ar,inv,cash,debt,assets,dso,dr,cr,rev,profit){
+  const r=[];
+  if(dso>60)r.push({id:'FIN-001',name:'خطر تأخر التحصيل من العملاء',category:'ائتمانية',cause:`أيام التحصيل DSO = ${dso} يوم تتجاوز المعيار المقبول 45 يوم`,probability:4,impact:4,action:'تخفيف (Mitigate)',owner:'إدارة الائتمان',cost:ar*0.1,analysis:'ارتفاع DSO يعني الأموال محبوسة لدى العملاء مما يضغط على السيولة'});
+  if(dr>0.6)r.push({id:'FIN-002',name:'خطر الرفع المالي المرتفع',category:'مالية',cause:`نسبة الديون ${(dr*100).toFixed(0)}% من إجمالي الأصول تتجاوز 60%`,probability:3,impact:5,action:'تخفيف (Mitigate)',owner:'المدير المالي',cost:debt*0.05,analysis:'ارتفاع الرفع المالي يزيد عبء خدمة الدين ويقلل المرونة المالية'});
+  if(cr<1.5)r.push({id:'FIN-003',name:'خطر ضعف السيولة قصيرة الأجل',category:'مالية',cause:`نسبة التداول ${cr.toFixed(2)} أقل من المعيار 1.5`,probability:3,impact:4,action:'تخفيف (Mitigate)',owner:'المدير المالي',cost:cash*0.2,analysis:'قد لا تغطي الأصول المتداولة الالتزامات المستحقة'});
+  if(inv>rev*0.3&&rev>0)r.push({id:'FIN-004',name:'خطر تراكم المخزون',category:'تشغيلية',cause:`المخزون يمثل ${(inv/rev*100).toFixed(0)}% من الإيرادات`,probability:3,impact:3,action:'تخفيف (Mitigate)',owner:'إدارة المستودعات',cost:inv*0.15,analysis:'بطء دوران المخزون يعني رأس مال محتجز وخطر تقادم البضاعة'});
+  if(profit<rev*0.05&&rev>0)r.push({id:'FIN-005',name:'خطر ضيق هامش الربح',category:'استراتيجية',cause:`هامش الربح الصافي ${(profit/rev*100).toFixed(1)}% أقل من 5%`,probability:4,impact:4,action:'تجنب (Avoid)',owner:'الإدارة العليا',cost:rev*0.03,analysis:'هامش ضيق يعني أي ارتفاع في التكاليف أو انخفاض في المبيعات سيحول الربح إلى خسارة'});
+  if(!r.length)r.push({id:'FIN-001',name:'خطر تذبذب الإيرادات',category:'سوقية',cause:'تحتاج مراجعة أعمق للبيانات',probability:2,impact:3,action:'قبول (Accept)',owner:'إدارة المبيعات',cost:rev*0.05,analysis:'مراقبة مستمرة للأداء المالي'});
+  return r;
+}
+
+function renderFinRisks(){
+  document.getElementById('fin-rl').innerHTML=`<div class="st">🚨 المخاطر المستخرجة من القوائم المالية (${finBuf.length} مخاطر)</div>`+finBuf.map(r=>{const s=r.probability*r.impact,l=lvl(s);return`<div class="fin-card"><h4><span class="chip c-${cls(l)}" style="margin-left:.38rem">${l}</span>${r.name} <span style="color:var(--t3);font-size:.68rem">[${r.id}]</span></h4><div class="rs"><span class="rs-ic">🔍</span><span class="rs-tx">${r.cause}</span><span class="rs-lv" style="color:${clr(l)}">الدرجة: ${s}</span></div><div class="rs"><span class="rs-ic">💊</span><span class="rs-tx">${r.action} — ${r.owner}</span></div>${r.analysis?`<div class="rs"><span class="rs-ic">📝</span><span class="rs-tx">${r.analysis}</span></div>`:''}<div class="rs"><span class="rs-ic">💰</span><span class="rs-tx">التكلفة التقديرية</span><span class="rs-lv" style="color:var(--gold)">${(r.cost||0).toLocaleString('ar-EG')} ج.م</span></div></div>`;}).join('');
+}
+
+function addFinRisks(){
+  let n=0;finBuf.forEach(r=>{if(saveRisk({...r,type:'خطر (Risk)',status:'مفتوح',date_added:new Date().toISOString().split('T')[0],review_date:'',plan:'',description:r.analysis||''}))n++;});
+  alert(`✅ تم إضافة ${n} مخاطرة إلى السجل`);showTab('reg');
+}
+
+function exportFinExcel(){
+  const wb=XLSX.utils.book_new();
+  const v=collectFinVals();
+  // Sheet 1: Ratios
+  const ws1=XLSX.utils.aoa_to_sheet([
+    ['التحليل المالي — '+document.getElementById('fin-sec')?.value,''],
+    ['التاريخ',new Date().toLocaleDateString('ar-EG')],[''],
+    ['البند المالي','القيمة (ج.م)'],
+    ['الإيرادات',v.rev],['تكلفة المبيعات',v.cogs],['صافي الربح',v.profit],
+    ['الذمم المدينة',v.ar],['المخزون',v.inv],['النقدية',v.cash],
+    ['إجمالي الأصول',v.assets],['إجمالي الديون',v.debt],['حقوق الملكية',v.equity],
+  ]);
+  ws1['!cols']=[{wch:30},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws1,'البيانات المالية');
+  // Sheet 2: Risks
+  if(finBuf.length){
+    const ws2=XLSX.utils.aoa_to_sheet([['رمز الخطر','اسم الخطر','الفئة','السبب','احتمالية','تأثير','الدرجة','المستوى','الإجراء','التكلفة','التحليل'],...finBuf.map(r=>[r.id,r.name,r.category,r.cause,r.probability,r.impact,r.probability*r.impact,lvl(r.probability*r.impact),r.action,r.cost,r.analysis])]);
+    ws2['!cols']=[{wch:12},{wch:35},{wch:15},{wch:40},{wch:12},{wch:12},{wch:10},{wch:12},{wch:20},{wch:15},{wch:45}];
+    XLSX.utils.book_append_sheet(wb,ws2,'المخاطر المستخرجة');
+  }
+  XLSX.writeFile(wb,`تحليل_القوائم_المالية_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+function dlFinTemplate(){
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([
+    ['نموذج القوائم المالية — المنظومة الحديثة للإدارة المالية',''],
+    [''],
+    ['البند','القيمة (ج.م)','ملاحظة'],
+    ['إيرادات / مبيعات','','من قائمة الدخل'],
+    ['تكلفة المبيعات','','من قائمة الدخل'],
+    ['مجمل الربح','','= الإيرادات - تكلفة المبيعات'],
+    ['صافي الربح','','من قائمة الدخل'],
+    ['الذمم المدينة','','من الميزانية — أصول متداولة'],
+    ['المخزون','','من الميزانية — أصول متداولة'],
+    ['النقدية والبنوك','','من الميزانية — أصول متداولة'],
+    ['إجمالي الأصول المتداولة','','من الميزانية'],
+    ['إجمالي الأصول','','من الميزانية'],
+    ['الذمم الدائنة','','من الميزانية — التزامات متداولة'],
+    ['إجمالي الالتزامات المتداولة','','من الميزانية'],
+    ['إجمالي الديون والقروض','','من الميزانية'],
+    ['حقوق الملكية','','من الميزانية'],
+    ['مصاريف الفوائد','','من قائمة الدخل'],
+    ['التدفق النقدي التشغيلي','','من قائمة التدفقات النقدية'],
+  ]);
+  ws['!cols']=[{wch:35},{wch:20},{wch:35}];
+  XLSX.utils.book_append_sheet(wb,ws,'القوائم المالية');
+  XLSX.writeFile(wb,'نموذج_القوائم_المالية.xlsx');
+}
+
+// ══ AI ASSISTANT ══
+let aiH=[];
+function updAICtx(){
+  const risks=all();
+  document.getElementById('ai-ctx').innerHTML=risks.length?risks.slice(0,8).map(r=>`<div style="padding:.26rem 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><span>${r.id}: ${r.name.substring(0,26)}</span><span class="chip c-${cls(r.level)}">${r.level}</span></div>`).join('')+(risks.length>8?`<div style="color:var(--t3);font-size:.66rem;margin-top:.22rem">و ${risks.length-8} أخرى...</div>`:''): '<div style="color:var(--t3)">لا توجد مخاطر مسجلة</div>';
+}
+function quickQ(q){document.getElementById('ai-inp').value=q;sendAI();}
+async function sendAI(){
+  const inp=document.getElementById('ai-inp'),q=inp.value.trim();if(!q)return;
+  inp.value='';document.getElementById('btn-ai').disabled=true;
+  appendMsg('user',q);const typing=appendTyping();
+  const risks=all();
+  const ctx=risks.length?`سجل المخاطر (${risks.length} مخاطر):\n${risks.slice(0,10).map(r=>`- [${r.id}] ${r.name}: احتمالية=${r.probability}, تأثير=${r.impact}, درجة=${r.score}, مستوى=${r.level}, حالة=${r.status||'—'}`).join('\n')}`:'لا توجد مخاطر مسجلة.';
+  const sys=`أنت مستشار خبير في إدارة المخاطر المؤسسية (ERM) تتحدث العربية. تتعامل مع أستاذ عبد الفتاح قشطي — محاسب ومطور نظم ERP ورقابة مالية.\n\n${ctx}\n\nأجب بالعربية بأسلوب احترافي مباشر، استشهد بالمخاطر المسجلة برموزها، واربط بمعايير ISO 31000 وCOSO.`;
+  aiH.push({role:'user',content:q});if(aiH.length>12)aiH=aiH.slice(-12);
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:sys,messages:aiH})});
+    const data=await resp.json();
+    const text=data.content?.map(c=>c.text||'').join('')||'حدث خطأ في الاتصال.';
+    aiH.push({role:'assistant',content:text});typing.remove();appendMsg('ai',text);
+  }catch(e){typing.remove();appendMsg('ai','⚠️ خطأ في الاتصال. تأكد من الإنترنت.');}
+  document.getElementById('btn-ai').disabled=false;
+  const m=document.getElementById('ai-msgs');m.scrollTop=m.scrollHeight;
+}
+function appendMsg(role,text){
+  const m=document.getElementById('ai-msgs'),div=document.createElement('div');div.className=`msg ${role}`;
+  div.innerHTML=`<div class="mav">${role==='ai'?'🤖':'👤'}</div><div class="mb">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+  m.appendChild(div);m.scrollTop=m.scrollHeight;return div;
+}
+function appendTyping(){
+  const m=document.getElementById('ai-msgs'),div=document.createElement('div');div.className='msg ai';
+  div.innerHTML=`<div class="mav">🤖</div><div class="mb"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+  m.appendChild(div);m.scrollTop=m.scrollHeight;return div;
+}
+
+// ══ REPORTS ENGINE ══
+const SECS={
+  summary:    {l:'الملخص التنفيذي',on:true},
+  kpis:       {l:'مؤشرات KPI / KRI',on:true},
+  critical:   {l:'المخاطر البالغة والعالية',on:true},
+  register:   {l:'سجل المخاطر الكامل',on:true},
+  heatmap:    {l:'تحليل خريطة الحرارة',on:true},
+  byCategory: {l:'توزيع حسب الفئة',on:false},
+  financial:  {l:'التكاليف المالية',on:false},
+  statistics: {l:'التحليل الإحصائي',on:false},
+  scenarios:  {l:'تحليل السيناريوهات',on:false},
+  actions:    {l:'خطط المعالجة',on:false},
+  methodology:{l:'المنهجية المستخدمة',on:false},
+  signature:  {l:'التوقيع والبيانات',on:true},
+};
+const PRESETS={
+  full:       Object.keys(SECS),
+  liquidity:  ['summary','kpis','critical','financial','statistics','signature'],
+  credit:     ['summary','critical','register','actions','signature'],
+  operational:['summary','register','byCategory','actions','signature'],
+  executive:  ['summary','kpis','critical','heatmap','signature'],
+  kri:        ['summary','kpis','statistics','scenarios','signature'],
+  custom:     [],
+};
+let curRpt='full';
+function selectRpt(t,el){curRpt=t;document.querySelectorAll('.rpt-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');initToggles(t);}
+function initToggles(t){
+  const preset=PRESETS[t]||[];
+  document.getElementById('rpt-toggles').innerHTML=Object.entries(SECS).map(([k,v])=>{
+    const on=preset.includes(k)||(t==='full');
+    return`<div class="rpt-toggle" onclick="tglSec('${k}')"><span>${v.l}</span><div class="tsw ${on?'on':''}" id="tsw-${k}"></div></div>`;
+  }).join('');
+}
+function tglSec(k){document.getElementById('tsw-'+k)?.classList.toggle('on');}
+function getActive(){return Object.keys(SECS).filter(k=>document.getElementById('tsw-'+k)?.classList.contains('on'));}
+
+function buildReport(){
+  const risks=all(),secs=getActive();
+  const co=gv('rco')||'الشركة',per=gv('rper')||new Date().toLocaleDateString('ar-EG');
+  const aut=gv('raut')||'عبد الفتاح قشطي',notes=gv('rnotes');
+  const n=risks.length,cr=risks.filter(r=>r.level==='بالغ').length,hi=risks.filter(r=>r.level==='عالٍ').length;
+  const op=risks.filter(r=>r.status==='مفتوح').length,cost=risks.reduce((s,r)=>s+(r.cost||0),0);
+  let html=`<h2>📋 تقرير إدارة المخاطر — ${co}</h2><p style="text-align:center;font-size:.78rem;color:#555;margin-bottom:1.1rem">الفترة: ${per} | تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}</p>`;
+
+  if(secs.includes('summary'))html+=`<h3>📌 الملخص التنفيذي</h3><table><thead><tr><th>المؤشر</th><th>القيمة</th><th>التقييم</th></tr></thead><tbody><tr><td>إجمالي المخاطر</td><td><strong>${n}</strong></td><td>—</td></tr><tr><td>مخاطر بالغة</td><td style="color:red;font-weight:bold">${cr}</td><td>${cr>0?'تستوجب تدخلاً فورياً':'مقبول'}</td></tr><tr><td>مخاطر عالية</td><td style="color:darkorange;font-weight:bold">${hi}</td><td>${hi>2?'مرتفع':'يحتاج متابعة'}</td></tr><tr><td>مخاطر مفتوحة</td><td>${op}</td><td>${op>n*0.5?'نسبة مرتفعة':'مقبول'}</td></tr><tr><td>إجمالي التكاليف التقديرية</td><td>${cost.toLocaleString('ar-EG')} ج.م</td><td>—</td></tr></tbody></table>`;
+
+  if(secs.includes('kpis'))html+=`<h3>🎯 مؤشرات KPI / KRI</h3><table><thead><tr><th>المؤشر</th><th>القيمة</th><th>الهدف</th><th>الحالة</th></tr></thead><tbody><tr><td>معدل المخاطر البالغة</td><td>${n?(cr/n*100).toFixed(1):0}%</td><td>< 5%</td><td style="color:${n&&cr/n>0.05?'red':'green'}">${n&&cr/n>0.05?'⚠️ تجاوز الحد':'✅ ضمن الحد'}</td></tr><tr><td>نسبة المخاطر المفتوحة</td><td>${n?(op/n*100).toFixed(1):0}%</td><td>< 30%</td><td style="color:${n&&op/n>0.3?'darkorange':'green'}">${n&&op/n>0.3?'⚠️ مرتفع':'✅ مقبول'}</td></tr><tr><td>متوسط درجة الخطر</td><td>${n?(risks.reduce((s,r)=>s+r.score,0)/n).toFixed(1):0}</td><td>< 9</td><td>—</td></tr><tr><td>Expected Loss</td><td>${risks.reduce((s,r)=>s+(r.cost||0)*(r.probability/5),0).toLocaleString('ar-EG')} ج.م</td><td>—</td><td>—</td></tr></tbody></table>`;
+
+  if(secs.includes('critical')){const crit=risks.filter(r=>['بالغ','عالٍ'].includes(r.level));if(crit.length)html+=`<h3>🚨 المخاطر البالغة والعالية</h3><table><thead><tr><th>الرمز</th><th>اسم الخطر</th><th>الدرجة</th><th>المستوى</th><th>الإجراء</th><th>المسؤول</th><th>الحالة</th></tr></thead><tbody>${crit.map(r=>`<tr><td>${r.id}</td><td>${r.name}</td><td style="font-weight:bold;color:${r.level==='بالغ'?'red':'darkorange'}">${r.score}</td><td>${r.level}</td><td>${r.action||'—'}</td><td>${r.owner||'—'}</td><td>${r.status||'—'}</td></tr>`).join('')}</tbody></table>`;}
+
+  if(secs.includes('register'))html+=`<h3>📋 سجل المخاطر الكامل</h3><table><thead><tr><th>الرمز</th><th>اسم الخطر</th><th>الفئة</th><th>احتمالية</th><th>تأثير</th><th>الدرجة</th><th>المستوى</th><th>الإجراء</th><th>الحالة</th></tr></thead><tbody>${risks.map(r=>`<tr><td>${r.id}</td><td>${r.name}</td><td>${r.category||'—'}</td><td style="text-align:center">${r.probability}</td><td style="text-align:center">${r.impact}</td><td style="font-weight:bold;text-align:center">${r.score}</td><td>${r.level}</td><td>${r.action||'—'}</td><td>${r.status||'—'}</td></tr>`).join('')}</tbody></table>`;
+
+  if(secs.includes('byCategory')){const cats={};risks.forEach(r=>{const c=r.category||'غير محدد';if(!cats[c])cats[c]={n:0,cr:0,hi:0,cost:0};cats[c].n++;if(r.level==='بالغ')cats[c].cr++;if(r.level==='عالٍ')cats[c].hi++;cats[c].cost+=(r.cost||0);});html+=`<h3>🏷️ توزيع المخاطر حسب الفئة</h3><table><thead><tr><th>الفئة</th><th>إجمالي</th><th>بالغة</th><th>عالية</th><th>التكلفة</th></tr></thead><tbody>${Object.entries(cats).map(([c,v])=>`<tr><td>${c}</td><td>${v.n}</td><td style="color:red">${v.cr}</td><td style="color:darkorange">${v.hi}</td><td>${v.cost.toLocaleString('ar-EG')}</td></tr>`).join('')}</tbody></table>`;}
+
+  if(secs.includes('financial')){const top=[...risks].sort((a,b)=>(b.cost||0)-(a.cost||0)).slice(0,8);html+=`<h3>💰 التكاليف المالية التقديرية</h3><table><thead><tr><th>الرمز</th><th>اسم الخطر</th><th>الدرجة</th><th>التكلفة</th><th>الخسارة المتوقعة</th></tr></thead><tbody>${top.map(r=>`<tr><td>${r.id}</td><td>${r.name}</td><td>${r.score}</td><td>${(r.cost||0).toLocaleString('ar-EG')} ج.م</td><td>${((r.cost||0)*(r.probability/5)).toLocaleString('ar-EG')} ج.م</td></tr>`).join('')}<tr style="background:#f0f0f0"><td colspan="3"><strong>الإجمالي</strong></td><td><strong>${cost.toLocaleString('ar-EG')} ج.م</strong></td><td><strong>${risks.reduce((s,r)=>s+(r.cost||0)*(r.probability/5),0).toLocaleString('ar-EG')} ج.م</strong></td></tr></tbody></table>`;}
+
+  if(secs.includes('statistics')&&risks.length){const sc=risks.map(r=>r.score),mean=sc.reduce((a,b)=>a+b,0)/sc.length,std=Math.sqrt(sc.reduce((s,x)=>s+Math.pow(x-mean,2),0)/sc.length);html+=`<h3>📐 التحليل الإحصائي</h3><table><thead><tr><th>المؤشر</th><th>القيمة</th><th>التفسير</th></tr></thead><tbody><tr><td>المتوسط (μ)</td><td>${mean.toFixed(2)}</td><td>${mean>12?'مستوى خطر مرتفع':mean>7?'مستوى متوسط':'مستوى مقبول'}</td></tr><tr><td>الانحراف المعياري (σ)</td><td>${std.toFixed(2)}</td><td>${std>5?'تشتت كبير في الدرجات':'درجات متقاربة'}</td></tr><tr><td>معامل الاختلاف (CV)</td><td>${mean>0?(std/mean*100).toFixed(1):0}%</td><td>مقياس التشتت النسبي</td></tr><tr><td>أعلى درجة خطر</td><td>${Math.max(...sc)}</td><td>${risks.find(r=>r.score===Math.max(...sc))?.name||'—'}</td></tr></tbody></table>`;}
+
+  if(secs.includes('heatmap'))html+=`<h3>🔥 تحليل خريطة الحرارة</h3><table><thead><tr><th>الدرجة</th><th>المستوى</th><th>عدد المخاطر</th><th>التوزيع %</th></tr></thead><tbody><tr><td>17–25</td><td style="color:red;font-weight:bold">بالغ</td><td>${risks.filter(r=>r.score>=17).length}</td><td>${n?(risks.filter(r=>r.score>=17).length/n*100).toFixed(1):0}%</td></tr><tr><td>10–16</td><td style="color:darkorange">عالٍ</td><td>${risks.filter(r=>r.score>=10&&r.score<17).length}</td><td>${n?(risks.filter(r=>r.score>=10&&r.score<17).length/n*100).toFixed(1):0}%</td></tr><tr><td>5–9</td><td style="color:goldenrod">متوسط</td><td>${risks.filter(r=>r.score>=5&&r.score<10).length}</td><td>${n?(risks.filter(r=>r.score>=5&&r.score<10).length/n*100).toFixed(1):0}%</td></tr><tr><td>1–4</td><td style="color:green">منخفض</td><td>${risks.filter(r=>r.score<5).length}</td><td>${n?(risks.filter(r=>r.score<5).length/n*100).toFixed(1):0}%</td></tr></tbody></table>`;
+
+  if(secs.includes('actions')){const wp=risks.filter(r=>r.plan||r.action);if(wp.length)html+=`<h3>🔧 خطط المعالجة</h3><table><thead><tr><th>الرمز</th><th>اسم الخطر</th><th>الاستراتيجية</th><th>المسؤول</th><th>الحالة</th><th>تاريخ المراجعة</th></tr></thead><tbody>${wp.map(r=>`<tr><td>${r.id}</td><td>${r.name}</td><td>${r.action||'—'}</td><td>${r.owner||'—'}</td><td>${r.status||'—'}</td><td>${r.review_date||'—'}</td></tr>`).join('')}</tbody></table>`;}
+
+  if(secs.includes('methodology'))html+=`<h3>📚 المنهجية المستخدمة</h3><p style="font-size:.78rem;color:#333;line-height:1.8">يعتمد هذا التقرير على معيار <strong>ISO 31000:2018</strong> لإدارة المخاطر وإطار <strong>COSO ERM</strong>. يُحسب مستوى الخطر وفق: <em>درجة المخاطرة = الاحتمالية × التأثير</em> على مقياس من 1 إلى 25.</p>`;
+
+  if(notes)html+=`<h3>📝 ملاحظات وتوصيات</h3><p style="font-size:.8rem;color:#333;line-height:1.8;background:#f8f9fa;padding:.9rem;border-radius:6px;border-right:3px solid #0a1628">${notes}</p>`;
+
+  if(secs.includes('signature'))html+=`<div class="sig"><strong>${aut}</strong><br>مطور نظم ورقابة مالية — المنظومة الحديثة للإدارة المالية<br><span style="font-size:.7rem;color:#888">تاريخ الإصدار: ${new Date().toLocaleDateString('ar-EG')} | ERM Pro v3.0</span></div>`;
+
+  document.getElementById('rpt-prev').innerHTML=html;
+  document.getElementById('rpt-wrap').style.display='block';
+  document.getElementById('rpt-wrap').scrollIntoView({behavior:'smooth'});
+}
+
+function printReport(){buildReport();setTimeout(()=>window.print(),400);}
+
+function exportRptExcel(){
+  const risks=all(),secs=getActive(),wb=XLSX.utils.book_new();
+  const co=gv('rco')||'الشركة',per=gv('rper')||'',aut=gv('raut')||'عبد الفتاح قشطي';
+  const n=risks.length,cr=risks.filter(r=>r.level==='بالغ').length,hi=risks.filter(r=>r.level==='عالٍ').length,op=risks.filter(r=>r.status==='مفتوح').length,cost=risks.reduce((s,r)=>s+(r.cost||0),0);
+  const ws1=XLSX.utils.aoa_to_sheet([['تقرير إدارة المخاطر — '+co],['الفترة: '+per],['المعد: '+aut],['التاريخ: '+new Date().toLocaleDateString('ar-EG')],[],['المؤشر','القيمة','الهدف'],['إجمالي المخاطر',n,'—'],['مخاطر بالغة',cr,'< 5% من الإجمالي'],['مخاطر عالية',hi,'—'],['مخاطر مفتوحة',op,'—'],['إجمالي التكاليف',cost,'—'],['متوسط درجة الخطر',n?(risks.reduce((s,r)=>s+r.score,0)/n).toFixed(2):0,'< 9']]);
+  ws1['!cols']=[{wch:30},{wch:20},{wch:25}];XLSX.utils.book_append_sheet(wb,ws1,'الملخص التنفيذي');
+  if(secs.includes('register')){const ws2=XLSX.utils.aoa_to_sheet([['رمز الخطر','اسم الخطر','الفئة','النوع','السبب','احتمالية','تأثير','درجة','مستوى','الإجراء','الحالة','المسؤول','تاريخ الرصد','المراجعة','التكلفة','خطة المعالجة'],...risks.map(r=>[r.id,r.name,r.category,r.type,r.cause,r.probability,r.impact,r.score,r.level,r.action,r.status,r.owner,r.date_added,r.review_date,r.cost,r.plan])]);ws2['!cols']=[{wch:12},{wch:30},{wch:15},{wch:15},{wch:30},{wch:12},{wch:12},{wch:10},{wch:12},{wch:20},{wch:15},{wch:20},{wch:14},{wch:14},{wch:15},{wch:40}];XLSX.utils.book_append_sheet(wb,ws2,'سجل المخاطر');}
+  if(secs.includes('critical')){const crit=risks.filter(r=>['بالغ','عالٍ'].includes(r.level));if(crit.length){const ws3=XLSX.utils.aoa_to_sheet([['رمز الخطر','اسم الخطر','الدرجة','المستوى','الإجراء','المسؤول','الحالة'],...crit.map(r=>[r.id,r.name,r.score,r.level,r.action||'—',r.owner||'—',r.status||'—'])]);XLSX.utils.book_append_sheet(wb,ws3,'المخاطر البالغة والعالية');}}
+  if(secs.includes('kpis')){const ws4=XLSX.utils.aoa_to_sheet([['مؤشر KRI','القيمة','الهدف','الحالة'],['معدل البالغة',n?(cr/n*100).toFixed(1)+'%':0,'< 5%',n&&cr/n>0.05?'تجاوز الحد':'ضمن الحد'],['نسبة المفتوحة',n?(op/n*100).toFixed(1)+'%':0,'< 30%',n&&op/n>0.3?'مرتفع':'مقبول'],['متوسط الدرجة',n?(risks.reduce((s,r)=>s+r.score,0)/n).toFixed(1):0,'< 9','—'],['Expected Loss',risks.reduce((s,r)=>s+(r.cost||0)*(r.probability/5),0).toLocaleString(),'—','—']]);XLSX.utils.book_append_sheet(wb,ws4,'مؤشرات KRI');}
+  XLSX.writeFile(wb,`تقرير_${co.replace(/\s/g,'_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+// ══ EXPORT ALL ══
+function exportExcel(){
+  const risks=all();if(!risks.length){alert('لا توجد بيانات');return;}
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([['رمز الخطر','اسم الخطر','الفئة','النوع','السبب','الوصف','الاحتمالية','التأثير','الدرجة','المستوى','الإجراء','الحالة','المسؤول','تاريخ الرصد','المراجعة','التكلفة (ج.م)','خطة المعالجة'],...risks.map(r=>[r.id,r.name,r.category,r.type,r.cause,r.description,r.probability,r.impact,r.score,r.level,r.action,r.status,r.owner,r.date_added,r.review_date,r.cost,r.plan])]);
+  ws['!cols']=[{wch:12},{wch:30},{wch:15},{wch:15},{wch:30},{wch:40},{wch:12},{wch:12},{wch:10},{wch:12},{wch:20},{wch:15},{wch:20},{wch:14},{wch:14},{wch:15},{wch:40}];
+  XLSX.utils.book_append_sheet(wb,ws,'سجل المخاطر');
+  const n=risks.length;
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['مؤشر','القيمة'],['إجمالي',n],['بالغة',risks.filter(r=>r.level==='بالغ').length],['عالية',risks.filter(r=>r.level==='عالٍ').length],['مفتوحة',risks.filter(r=>r.status==='مفتوح').length],['إجمالي التكاليف',risks.reduce((s,r)=>s+(r.cost||0),0)],[],['عبد الفتاح قشطي','المنظومة الحديثة للإدارة المالية']]),'ملخص');
+  XLSX.writeFile(wb,`سجل_المخاطر_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+// ══ INIT ══
+function refreshAll(){renderDash();renderTable();}
+document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+initToggles('full');
+initDB().then(()=>{
+  // Load sample data only on first ever open
+  if(!localStorage.getItem('erm_v3_samples_loaded')){
+    loadSampleData();
+    localStorage.setItem('erm_v3_samples_loaded','1');
+  }
+});
+
+function loadSampleData(){
+  const samples=[
+    {id:'R-001',name:'ارتفاع أسعار مواد البناء',category:'سوقية',type:'خطر (Risk)',cause:'تقلبات سوق الحديد والأسمنت عالمياً',description:'ارتفاع مفاجئ في أسعار الخامات يؤثر على تكلفة المشاريع الجارية',probability:4,impact:4,score:16,level:'عالٍ',action:'تخفيف (Mitigate)',status:'مفتوح',owner:'مدير المشتريات',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:150000,plan:'إبرام عقود توريد طويلة الأجل بأسعار محددة مسبقاً'},
+    {id:'R-002',name:'تأخر تحصيل الذمم من العملاء',category:'ائتمانية',type:'خطر (Risk)',cause:'ضعف السيولة لدى بعض العملاء الحكوميين',description:'تأخر صرف المستخلصات يضغط على التدفق النقدي للشركة',probability:4,impact:5,score:20,level:'بالغ',action:'تخفيف (Mitigate)',status:'مفتوح',owner:'المدير المالي',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:500000,plan:'متابعة يومية للمستخلصات - تفعيل بند الفوائد التأخيرية في العقود'},
+    {id:'R-003',name:'نقص العمالة الفنية المتخصصة',category:'موارد بشرية',type:'خطر (Risk)',cause:'هجرة الكوادر الفنية للخارج وارتفاع الطلب المحلي',description:'صعوبة إيجاد مهندسين ومهنيين مؤهلين لتنفيذ المشاريع في المواعيد',probability:3,impact:3,score:9,level:'متوسط',action:'تخفيف (Mitigate)',status:'قيد التنفيذ',owner:'مدير الموارد البشرية',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:80000,plan:'برنامج تدريب داخلي - التعاقد مع شركات توريد عمالة'},
+    {id:'R-004',name:'تأخر الحصول على التراخيص',category:'قانونية وامتثال',type:'خطر (Risk)',cause:'بطء الإجراءات الحكومية وتغير اشتراطات البناء',description:'تأخر تراخيص البناء يوقف المشاريع ويسبب غرامات تأخير للعملاء',probability:3,impact:4,score:12,level:'عالٍ',action:'تخفيف (Mitigate)',status:'مفتوح',owner:'المدير القانوني',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:200000,plan:'تقديم الطلبات مبكراً - الاستعانة بمستشار حكومي'},
+    {id:'R-005',name:'ارتفاع أسعار الفائدة على القروض',category:'مالية',type:'خطر (Risk)',cause:'السياسة النقدية وارتفاع معدلات التضخم',description:'زيادة تكلفة التمويل تضغط على هوامش الربح في المشاريع طويلة الأجل',probability:3,impact:4,score:12,level:'عالٍ',action:'تحويل (Transfer)',status:'مفتوح',owner:'المدير المالي',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:120000,plan:'التفاوض على قروض بفائدة ثابتة - النظر في التحوط المالي'},
+    {id:'R-006',name:'أعطال المعدات الثقيلة',category:'تشغيلية',type:'خطر (Risk)',cause:'قِدم بعض المعدات وارتفاع تكاليف قطع الغيار',description:'توقف المعدات يؤخر تنفيذ المشاريع ويزيد التكاليف',probability:3,impact:3,score:9,level:'متوسط',action:'تخفيف (Mitigate)',status:'قيد التنفيذ',owner:'مدير الميكانيكا',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:60000,plan:'برنامج صيانة دورية - عقود صيانة مع الموردين'},
+    {id:'R-007',name:'تقلبات سعر صرف الدولار',category:'سوقية',type:'خطر (Risk)',cause:'عدم استقرار سوق الصرف الأجنبي',description:'ارتفاع الدولار يزيد تكلفة المواد المستوردة ويضغط على تكاليف المشاريع',probability:4,impact:3,score:12,level:'عالٍ',action:'تحويل (Transfer)',status:'مفتوح',owner:'المدير المالي',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:90000,plan:'إدراج بنود تعديل الأسعار في العقود الجديدة'},
+    {id:'R-008',name:'حوادث السلامة في المواقع',category:'تشغيلية',type:'خطر (Risk)',cause:'ضغط العمل وإغفال إجراءات السلامة',description:'حوادث العمل تسبب خسائر بشرية ومادية وتأخيراً في التنفيذ',probability:2,impact:5,score:10,level:'عالٍ',action:'تخفيف (Mitigate)',status:'قيد التنفيذ',owner:'مسؤول السلامة',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:300000,plan:'برنامج تدريب سلامة شهري - توفير معدات الحماية الكاملة'},
+    {id:'R-009',name:'فسخ عقد من قِبل العميل',category:'قانونية وامتثال',type:'خطر (Risk)',cause:'خلافات تعاقدية أو إعسار العميل',description:'فسخ العقد يسبب خسائر مباشرة وتعطل الموارد المخصصة للمشروع',probability:2,impact:5,score:10,level:'عالٍ',action:'تحويل (Transfer)',status:'مفتوح',owner:'المدير القانوني',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:400000,plan:'مراجعة قانونية دقيقة للعقود - ضمانات بنكية'},
+    {id:'R-010',name:'ضعف نظم المعلومات والبيانات',category:'تقنية',type:'خطر (Risk)',cause:'قِدم البنية التقنية وغياب نظام ERP متكامل',description:'عدم وجود نظام متكامل يسبب أخطاء في البيانات وتأخر في اتخاذ القرار',probability:2,impact:3,score:6,level:'متوسط',action:'تخفيف (Mitigate)',status:'قيد التنفيذ',owner:'مدير تقنية المعلومات',date_added:new Date().toISOString().split('T')[0],review_date:'',cost:50000,plan:'تطوير نظام ERP متكامل يشمل إدارة المخاطر'},
+  ];
+  samples.forEach(r=>{
+    try{
+      db.run(`INSERT OR IGNORE INTO risks VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        [r.id,r.name,r.category,r.type,r.cause,r.description,r.probability,r.impact,r.score,r.level,r.action,r.status,r.owner,r.date_added,r.review_date,r.cost,r.plan]);
+    }catch(e){}
+  });
+  svDB();refreshAll();
+}
+</script>
+</body>
+</html>
